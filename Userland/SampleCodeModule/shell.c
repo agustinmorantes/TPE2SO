@@ -5,7 +5,7 @@
 #include <syscall.h>
 
 #define NULL 0
-#define TERMINAL_COUNT 2
+#define TERMINAL_COUNT 1
 #define MAX_CMD_LEN 1024
 
 // atributos para gcc, porque por default se guarda en bss el cual se limpia al reiniciar el shell

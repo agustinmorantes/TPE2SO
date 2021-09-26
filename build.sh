@@ -1,3 +1,3 @@
 #!/bin/bash
-docker start arqui_os
-docker exec arqui_os make
+docker start tp2so
+docker exec tp2so make

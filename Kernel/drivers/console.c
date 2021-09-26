@@ -26,8 +26,8 @@ static uint64_t screenLength;
 static uint64_t terminalID; // Terminal ID from 0 to N-1.
 
 // cantidad de pixeles usados para separar entre terminales debe ser entre 2 y 16
-#define SEPARATION_WIDTH 2
-#define SCREEN_QUANTITY 2
+#define SEPARATION_WIDTH 0
+#define SCREEN_QUANTITY 1
 //backups de los cursores para el cambio de terminal
 static uint64_t cursors[SCREEN_QUANTITY];
 
