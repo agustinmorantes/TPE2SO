@@ -1,5 +1,8 @@
 
-all:  bootloader kernel userland image
+all: shared bootloader kernel userland image
+
+shared: 
+	cd Shared; make all
 
 bootloader:
 	cd Bootloader; make all
@@ -10,7 +13,7 @@ kernel:
 userland:
 	cd Userland; make all
 
-image: kernel bootloader userland
+image: shared kernel bootloader userland
 	cd Image; make all
 
 clean:
@@ -18,5 +21,6 @@ clean:
 	cd Image; make clean
 	cd Kernel; make clean
 	cd Userland; make clean
+	cd Shared; make clean
 
-.PHONY: bootloader image collections kernel userland all clean
+.PHONY: bootloader image collections kernel userland all clean shared

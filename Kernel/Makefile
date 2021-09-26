@@ -3,7 +3,7 @@ include Makefile.inc
 KERNEL=kernel.bin
 
 # Directorios Include
-INCLUDE_DIRS=include interruptions/include drivers/include
+INCLUDE_DIRS=include interruptions/include drivers/include ../Shared/include
 INCLUDES=$(addprefix -I ,$(INCLUDE_DIRS))
 
 # Codigo .c y .asm
@@ -14,13 +14,14 @@ SOURCES_ASM=$(wildcard asm/*.asm) $(wildcard interruptions/asm/*.asm) $(wildcard
 OBJECTS_DIR=./obj
 OBJECTS=$(SOURCES:%.c=$(OBJECTS_DIR)/%.o)
 OBJECTS_ASM=$(SOURCES_ASM:%.asm=$(OBJECTS_DIR)/%.o)
+OBJECTS_SHARED=$(wildcard ../Shared/obj/*.o)
 
 LOADERSRC=loader.asm
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
 STATICLIBS=
 
 # Archivos a linkeditar
-ALL_OBJECTS= $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM)
+ALL_OBJECTS= $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_SHARED)
 
 # Regla "make all"
 all: $(KERNEL)
