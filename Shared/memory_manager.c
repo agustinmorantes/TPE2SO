@@ -2,12 +2,18 @@
 #include <stdint.h>
 
 #define MAX_SIZE 64*1024*1024
+#define START_MM 0x900000
 
-char * current = 0x900000;
+static char * current;
 
 void * alloc(size_t size) 
 {
-    if (size > current + MAX_SIZE)
+    if (current == 0)
+    {
+        current = START_MM;
+    }
+    
+    if (current + size > START_MM + MAX_SIZE)
     {
         return NULL;
     }
