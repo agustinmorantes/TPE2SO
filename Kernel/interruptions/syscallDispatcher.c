@@ -24,9 +24,6 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 			setTerminalRawMode((uint8_t)arg0);
 			return 0;
 			break;
-		case 6:
-			return getCurrentTerminalSyscall();
-			break;
 	}
 	return -1;
 }

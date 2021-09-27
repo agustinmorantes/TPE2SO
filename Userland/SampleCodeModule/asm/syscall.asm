@@ -32,5 +32,3 @@ _sysprintmem:
     systemCall 4
 _systerminalraw:
     systemCall 5
-_sysgetcurrentterminal:
-    systemCall 6

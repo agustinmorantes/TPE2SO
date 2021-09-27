@@ -9,4 +9,3 @@ int64_t _systime(Time* res);
 void _sysclear();
 void _sysprintmem(const void* ptr);
 void _systerminalraw(uint8_t rawMode);
-uint64_t _sysgetcurrentterminal();

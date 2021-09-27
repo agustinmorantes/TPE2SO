@@ -1,20 +1,17 @@
 #include <stdint.h>
 #include <console.h>
 #include <numtostr.h>
-#include <bizcat.h>
 #include <color.h>
 
 #define COLS 80
 #define ROWS 25
 
-static uint64_t terminalID; // Terminal ID from 0 to N-1.
 static uint8_t* screen = (uint8_t*)0xB8000;
 static uint32_t cursorPos = 2; //Si lo coloco en 0 gcc coloca la variable en la sección .bss (que no me sirve)
 static char buffer[64];
 
 //Inicializo lo necesario para el funcionamiento del driver
 void initVideo() {
-	terminalID = 0;
 	resetCursor();
 }
 
@@ -24,10 +21,6 @@ static uint64_t getCursorX() {
 
 static uint64_t getCursorY() {
 	return cursorPos/COLS;
-}
-
-uint64_t getCurrentTerminal() {
-	return terminalID;
 }
 
 static void scrollUp() {
