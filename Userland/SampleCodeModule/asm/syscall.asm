@@ -30,9 +30,7 @@ _sysclear:
     systemCall 3
 _sysprintmem:
     systemCall 4
-_sysswitchterminal:
-    systemCall 5
 _systerminalraw:
-    systemCall 6
+    systemCall 5
 _sysgetcurrentterminal:
-    systemCall 7
+    systemCall 6

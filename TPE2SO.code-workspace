@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "Userland\\SampleCodeModule"
+		},
+		{
+			"path": "."
 		}
 	],
 	"settings": {

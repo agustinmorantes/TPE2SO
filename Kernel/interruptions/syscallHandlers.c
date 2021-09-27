@@ -82,10 +82,6 @@ void clearTerminalSyscall() {
     clearTerminal();
 }
 
-void switchTerminalSyscall() {
-    switchTerminal();
-}
-
 void setTerminalRawMode(uint8_t setRaw) {
     rawMode = setRaw != 0;
 }
