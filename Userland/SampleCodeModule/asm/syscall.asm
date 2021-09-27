@@ -3,9 +3,7 @@ GLOBAL _sysread
 GLOBAL _systime
 GLOBAL _sysclear
 GLOBAL _sysprintmem
-GLOBAL _sysswitchterminal
 GLOBAL _systerminalraw
-GLOBAL _sysgetcurrentterminal
 
 section .text
 

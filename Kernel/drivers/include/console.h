@@ -24,8 +24,6 @@ void setScreenPos(unsigned int x, unsigned int y, uint8_t c, Color background, C
 void clearTerminalColor(Color background);
 void clearTerminal();
 
-uint64_t getCurrentTerminal();
-
 void switchTerminal();
 void newLine();
 void resetCursor();
