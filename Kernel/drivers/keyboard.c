@@ -91,13 +91,14 @@ static const uint8_t ShiftAsciiTable[] = {
 //Estado (valor booleano) actual de cada tecla
 static uint8_t keyState[KEY_COUNT] = {0};
 
-static uint8_t waitingKey = 0;
+static uint8_t keysToRead = 0;
 
 // Para saber si el último scancode que lei fue 0xE0 (para teclas con scancode de 2 o más bytes) 
 static uint8_t isSpecialKey = 0; 
 
 static Key buffer[BUFF_LEN]; 
-static uint32_t lastPressed = 0;
+static uint32_t read_idx = 0;
+static uint32_t write_idx = 0;
 
 static uint8_t toUpper(uint8_t c) {
     if(c >= 'a' && c <= 'z') return c - 'a' + 'A';
@@ -116,10 +117,9 @@ Key readKey()
 {
     waitKey();
 
-    if (lastPressed == BUFF_LEN)
-        lastPressed = 0;
-    
-    Key k = buffer[lastPressed++];
+    Key k = buffer[read_idx++];
+    if (read_idx == BUFF_LEN)
+        read_idx = 0;
     return k;
 }
 
@@ -145,8 +145,11 @@ uint8_t readAscii()
 
 //Espera en modo baja energía hasta que llegue una tecla
 void waitKey() {
-    while(waitingKey == 0) _hlt();
-    waitingKey--;
+    while(!keysToRead) {
+        write_idx = read_idx;
+        _hlt();
+    }
+    keysToRead--;
 }
 
 //Conversión de teclas especiales a Key
@@ -190,7 +193,6 @@ Key handleSpecialKey(uint8_t scancode) {
 
 //Handler de interrupción
 void handleKeyboardInterrupt() {
-    static uint32_t buff_idx = 0;
     uint8_t scancode = readKeyRaw();
 
     //Chequeo si es el comienzo de una tecla especial
@@ -230,14 +232,14 @@ void handleKeyboardInterrupt() {
 
     //Si presioné una tecla válida la guardo y dejo de esperar
     if(pressed) {
-        buffer[buff_idx++] = k;
-        waitingKey++;
+        buffer[write_idx++] = k;
+        keysToRead++;
     }
     //Si llegue al final de buffer vuelvo a empezar
-    if (buff_idx == BUFF_LEN )
-        buff_idx = 0;
+    if (write_idx == BUFF_LEN )
+        write_idx = 0;
     
     //Si hay BUFF_LEN teclas para leer significa que estoy sobreescribiendo el buffer
-    if (waitingKey == BUFF_LEN)
-        waitingKey--;
+    if (keysToRead > BUFF_LEN)
+        keysToRead = BUFF_LEN;
 }
