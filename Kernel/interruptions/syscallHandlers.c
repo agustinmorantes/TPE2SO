@@ -35,9 +35,6 @@ int64_t read(uint64_t fd, char* buf, uint64_t count) {
         return i;
     }
 
-    uint8_t cols = getColumns();
-    int minCursorPos = getCursorPos() % cols;
-
     int i;
     for(i = 0; i < count; i++) {
         char c = readAscii();
@@ -82,16 +79,8 @@ void clearTerminalSyscall() {
     clearTerminal();
 }
 
-void switchTerminalSyscall() {
-    switchTerminal();
-}
-
 void setTerminalRawMode(uint8_t setRaw) {
     rawMode = setRaw != 0;
-}
-
-uint64_t getCurrentTerminalSyscall() {
-    return getCurrentTerminal();
 }
 
 void printmem(const void* ptr) {
