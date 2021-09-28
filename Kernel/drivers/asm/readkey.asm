@@ -4,6 +4,7 @@ GLOBAL readKeyPoll
 readKeyRaw:
     mov rax,0
     in al,0x64
+    and al,0x01
     cmp al,0
     jne .read
     mov rax,0

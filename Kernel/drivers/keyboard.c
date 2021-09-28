@@ -3,6 +3,7 @@
 #include <console.h>
 
 #define KEY_COUNT 105
+#define BUFF_LEN 1024
 
 //Tabla de conversión de scancode a Key
 static const Key KeyTable[] = {
@@ -89,11 +90,15 @@ static const uint8_t ShiftAsciiTable[] = {
 
 //Estado (valor booleano) actual de cada tecla
 static uint8_t keyState[KEY_COUNT] = {0};
-static uint8_t waitingKey;
+
+static uint8_t keysToRead = 0;
 
 // Para saber si el último scancode que lei fue 0xE0 (para teclas con scancode de 2 o más bytes) 
 static uint8_t isSpecialKey = 0; 
-static Key lastPressed;
+
+static Key buffer[BUFF_LEN]; 
+static uint32_t read_idx = 0;
+static uint32_t write_idx = 0;
 
 static uint8_t toUpper(uint8_t c) {
     if(c >= 'a' && c <= 'z') return c - 'a' + 'A';
@@ -111,7 +116,11 @@ uint8_t isKeyPressed(Key key) {
 Key readKey()
 {
     waitKey();
-    return lastPressed;
+
+    Key k = buffer[read_idx++];
+    if (read_idx == BUFF_LEN)
+        read_idx = 0;
+    return k;
 }
 
 // Espera a que llegue una tecla por interrupción (con el cpu en modo baja energía)
@@ -136,8 +145,11 @@ uint8_t readAscii()
 
 //Espera en modo baja energía hasta que llegue una tecla
 void waitKey() {
-    waitingKey = 1;
-    while(waitingKey) _hlt();
+    while(!keysToRead) {
+        write_idx = read_idx;
+        _hlt();
+    }
+    keysToRead--;
 }
 
 //Conversión de teclas especiales a Key
@@ -220,7 +232,14 @@ void handleKeyboardInterrupt() {
 
     //Si presioné una tecla válida la guardo y dejo de esperar
     if(pressed) {
-        lastPressed = k;
-        waitingKey = 0;
+        buffer[write_idx++] = k;
+        keysToRead++;
     }
+    //Si llegue al final de buffer vuelvo a empezar
+    if (write_idx == BUFF_LEN )
+        write_idx = 0;
+    
+    //Si hay BUFF_LEN teclas para leer significa que estoy sobreescribiendo el buffer
+    if (keysToRead > BUFF_LEN)
+        keysToRead = BUFF_LEN;
 }
