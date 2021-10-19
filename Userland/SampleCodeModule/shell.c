@@ -40,6 +40,9 @@ void runShell() {
 		char input[MAX_CMD_LEN];
 		readinput(input);
 
+		if(strcmp(input, "") == 0)
+			continue;
+
 		char* argv[64];
 		int argc = split(input, argv, 64);
 
@@ -48,8 +51,7 @@ void runShell() {
 			cmd->handler(argc, (const char**)argv);
 		}
 		else {
-			printf("Comando desconocido.\n\n");
-			parseCommand("lscmd")->handler(0, NULL);
+			printf("Comando desconocido.\n");
 		}
     }
 }
