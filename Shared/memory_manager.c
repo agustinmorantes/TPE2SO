@@ -9,14 +9,13 @@ static char * current;
 void * alloc(size_t size) 
 {
     if (current == 0)
-    {
         current = START_MM;
-    }
     
+    size = size%16 ? size + (16 - size%16) : size;
+
     if (current + size > START_MM + MAX_SIZE)
-    {
         return NULL;
-    }
+
     void * aux = current;
     current += size;
     return aux;
