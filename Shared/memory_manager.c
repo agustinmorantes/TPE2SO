@@ -1,43 +1,176 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <stddef.h>
 
-#define MAX_SIZE 1048576 // 1Mb
+#define MAX_SIZE 8192 // 1Mb
 #define START_MM 0x900000
+
+//TODO ver esto
 #define BYTE_ALIGMENT 8
 #define ALIGMENT_MASK 0x0007
-#define MINIMUM_BLOCK_SIZE (( size_t ) structSize << 1)
+
+#define MINIMUM_BLOCK_SIZE (( size_t ) nodeSize << 1)
 #define BITS_PER_BYTE (( size_t ) 8)
 
 typedef struct freeNode 
 {
     struct freeNode * next;
-    size_t nodeSize;
+    size_t size;
 } freeNode;
 
-static freeNode start;
-static freeNode * end = NULL;
+static freeNode startNode;
+static freeNode * endNode = NULL;
 static const size_t nodeSize = ( sizeof( freeNode ) + ( ( size_t ) ( BYTE_ALIGMENT - 1 ) ) ) & ~( ( size_t ) ALIGMENT_MASK );
 static size_t freeBytesRemaining = 0U;
 static size_t nodeAllocatedBit = 0;
 
-static void addNodeToFreeList(freeNode toAdd);
+static void addNodeToFreeList(freeNode * toAdd);
 
 static void listInit() 
 {
-    freeNode * first;
-    uint8_t alignedHeap;
-    size_t startAddress = (size_t) START_MM;
+    freeNode * firstNode;
+    uint8_t * alignedHeap;
+    size_t auxAddress = (size_t) START_MM;
     size_t totalHeapSize = (size_t) MAX_SIZE;
 
-    if ((startAddress & ALIGMENT_MASK) != 0 )
+    // TODO Ver si es necesario esto
+    if ((auxAddress & ALIGMENT_MASK) != 0 )
     {
-        startAddress += (BYTE_ALIGMENT - 1);
-        startAddress &= ~((size_t) ALIGMENT_MASK);
-        totalHeapSize -= startAddress - (size_t)START_MM;
+        auxAddress += (BYTE_ALIGMENT - 1);
+        auxAddress &= ~((size_t) ALIGMENT_MASK);
+        totalHeapSize -= auxAddress - (size_t) START_MM;
     }
 
+    alignedHeap = (uint8_t *) auxAddress;
 
-    
+    startNode.next = (void *) alignedHeap;
+    startNode.size = 0U;
+
+    auxAddress = (size_t) alignedHeap + totalHeapSize;
+    auxAddress -= nodeSize;
+    auxAddress &= ~((size_t) ALIGMENT_MASK);
+
+    endNode = (void *) auxAddress;
+    endNode->size = 0;  
+    endNode->next = NULL;
+
+    firstNode = (void *) alignedHeap;
+    firstNode->size = auxAddress - (size_t) firstNode;
+    firstNode->next = endNode;
+
+    freeBytesRemaining = firstNode->size;
+
+    nodeAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * BITS_PER_BYTE ) - 1 );
 }
 
+void * alloc(size_t wantedSize)
+{
+    if (endNode == NULL)
+    {
+        listInit();
+    }
+    
+    if ((wantedSize & nodeAllocatedBit) == 0)
+    {
+        if (wantedSize > 0 && ((wantedSize + nodeSize) > wantedSize))
+        {
+            wantedSize += nodeSize;
+            if ((wantedSize & ALIGMENT_MASK) != 0x00)
+            {
+                if (( wantedSize + ( BYTE_ALIGMENT - ( wantedSize & ALIGMENT_MASK ) ) ) > wantedSize)
+                {
+                    wantedSize += BYTE_ALIGMENT - ( wantedSize & ALIGMENT_MASK );
+                }
+                else
+                    wantedSize = 0;
+            }
+        }
+        else
+            wantedSize = 0;
+        
+    }
+
+    if (wantedSize == 0 || wantedSize > freeBytesRemaining)
+        return NULL;
+
+    freeNode * prevNode = &startNode;
+    freeNode * iterator = startNode.next;
+    void * toReturn;
+    
+    while ((iterator->size < wantedSize) && (iterator->next != NULL))
+    {
+        prevNode = iterator;
+        iterator = iterator->next;
+    }
+    if (iterator != endNode)
+    {
+        toReturn = (void *) (((uint8_t *) prevNode->next) + nodeSize);
+
+        prevNode->next = iterator->next;
+        
+        if ((iterator->size - wantedSize) > MINIMUM_BLOCK_SIZE)
+        {
+            freeNode * newNode = (void *)((uint8_t *) iterator + wantedSize);
+
+            newNode->size = iterator->size - wantedSize;
+            iterator->size = wantedSize;
+
+            addNodeToFreeList(newNode);
+        }
+
+        freeBytesRemaining -= iterator->size;
+        iterator->size |= nodeAllocatedBit;
+        iterator->next = NULL;      
+    }
+    return toReturn;
+}
+
+static void addNodeToFreeList(freeNode * toAdd) 
+{
+    freeNode * iterator = &startNode;
+    uint8_t * puc;
+
+    while (iterator->next < toAdd)
+        iterator = iterator->next;
+    
+    puc = (uint8_t *) iterator;
+    if ((puc + iterator->size) == ((uint8_t *) toAdd))
+    {
+        iterator->size += toAdd->size;
+        toAdd = iterator;
+    }
+
+    puc = (uint8_t *) toAdd;
+    if ((puc + toAdd->size) == ((uint8_t *) iterator->next))
+    {
+        if (iterator->next != endNode)
+        {
+            toAdd->size += iterator->next->size;
+            toAdd->next = iterator->next->next;
+        }
+        else 
+        {
+            toAdd->next = endNode;
+        }
+    }
+    else 
+    {
+        toAdd->next = iterator->next;
+    }    
+    if (iterator != toAdd)
+    {
+        iterator->next = toAdd;
+    }
+}
+
+void free(void * ptr) 
+{
+    if (ptr == NULL)
+        return;
+    uint8_t * puc = ((uint8_t *) ptr) - nodeSize;
+    freeNode * node = (void *) puc;
+
+    node->size &= ~(nodeAllocatedBit);
+
+    freeBytesRemaining+= node->size;
+    addNodeToFreeList((freeNode *)node);
+}
