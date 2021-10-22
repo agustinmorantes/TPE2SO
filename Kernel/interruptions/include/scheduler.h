@@ -10,3 +10,4 @@ PID getpid(void);
 void blockProcess(void);
 void unblockProcess(PID pid);
 void terminateProcess(void);
+void _int20();

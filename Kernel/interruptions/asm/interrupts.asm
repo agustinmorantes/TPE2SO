@@ -16,10 +16,12 @@ GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 
 GLOBAL _syscallHandler
+GLOBAL _int20
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN syscallDispatcher
+EXTERN scheduler
 
 SECTION .text
 

@@ -75,6 +75,7 @@ void haltProc() {
 
 int main()
 {
+	clearTerminal();
 	printcln("[Kernel Main]", Black, Yellow);
 
 	_cli();
@@ -86,7 +87,7 @@ int main()
 	printnum(pid);
 	newLine();
 
-	pid = processCreate(testProc, 0, argv);
+	pid = processCreate(&testProc, 0, argv);
 	print("Second process created with PID ");
 	printnum(pid);
 	newLine();
@@ -95,7 +96,6 @@ int main()
 	print("First process created with PID ");
 	printnum(pid);
 	newLine();
-
 
 	initScheduler();
 
