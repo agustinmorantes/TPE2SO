@@ -222,3 +222,8 @@ void * scheduler(void * rsp) {
     
     return readyList.current->pcb.rsp;
 }
+
+void yield() {
+    readyList.current->priorityCounter = 0;
+    _int20();
+}
