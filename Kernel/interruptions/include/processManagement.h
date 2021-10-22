@@ -23,5 +23,5 @@ typedef struct {
     Priority priority;
 } PCB;
 
-PID processCreate(void* program, unsigned int argc, char** argv);
+PID processCreate(void* program, unsigned int argc, char** argv, Priority priority);
 void processRun(PID pid);

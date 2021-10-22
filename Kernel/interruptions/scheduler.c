@@ -188,9 +188,12 @@ void * scheduler(void * rsp) {
         removeTerminated();
     else if (readyList.current->pcb.state == BLOCKED)
         removeBlocked(readyList.current);
-    else 
+    else if (readyList.current->priorityCounter == 0) {
+        readyList.current->priorityCounter = readyList.current->pcb.priority;
         readyList.current = readyList.current->next;
-        
+    }
+    readyList.current->priorityCounter--;
+
     if (readyList.count == 0) {
         halt = 1;
         return haltRsp;
