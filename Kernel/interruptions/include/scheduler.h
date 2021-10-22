@@ -4,10 +4,10 @@
 
 void initScheduler(void);
 
-uint64_t scheduler(uint64_t rsp);
+void * scheduler(void * rsp);
 void schedulerAddProcess(PCB pcb);
 PID getpid(void);
-void blockProcess(void);
+void blockProcess(PID pid);
 void unblockProcess(PID pid);
 void terminateProcess(PID pid);
-void _int20();
+void _int20(void);
