@@ -7,6 +7,9 @@
 #include <rtc.h>
 #include <console.h>
 #include <syscallHandlers.h>
+#include <processManagement.h>
+#include <time.h>
+#include <scheduler.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -52,15 +55,52 @@ void *initializeKernelBinary()
 	return getStackBase();
 }
 
+void testProc() {
+	int t = 0;
+	while(1) {
+		int lastT = t;
+		t = seconds_elapsed();
+		if(t != lastT && t%3 == 0) {
+			print("Time:");
+			printnum(t);
+			newLine();
+		}
+		_hlt();
+	}
+}
+
+void haltProc() {
+	while(1) _hlt();
+}
+
 int main()
 {
 	printcln("[Kernel Main]", Black, Yellow);
 
-	print("  Sample code module at 0x");
-	printhex((uint64_t)sampleCodeModuleAddress);
+	_cli();
+
+	char* argv[1] = {0};
+
+	PID pid = processCreate(&haltProc, 0, argv);
+	print("Halt process created with PID ");
+	printnum(pid);
 	newLine();
-	println("  Calling the sample code module... ");
-	clearTerminal();
-	uint32_t retcode = ((EntryPoint)sampleCodeModuleAddress)();
+
+	pid = processCreate(testProc, 0, argv);
+	print("Second process created with PID ");
+	printnum(pid);
+	newLine();
+	
+	pid = processCreate(sampleCodeModuleAddress, 0, argv);
+	print("First process created with PID ");
+	printnum(pid);
+	newLine();
+
+
+	initScheduler();
+
+	println("Waiting for processes to run...");
+	while(1) _hlt();
+
 	return 0;
 }
