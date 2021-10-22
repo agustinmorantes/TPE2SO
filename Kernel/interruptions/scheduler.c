@@ -61,35 +61,33 @@ PID getpid() {
     return readyList.current->pcb.pid;
 }
 
-ProcessNode * changeProcessState(PID pid, State state) {
-    // si es el proceso actual lo saco con una int 20h
-    if (readyList.current->pcb.pid == pid) {
-        readyList.current->pcb.state = state;
-        _int20();
-        return NULL;
-    }
-
-    // si no primero busco en la cola de listos
+ProcessNode * searchReadyNode(PID pid) {
     ProcessNode * iterator = readyList.current;
     for (int i = 0; i < readyList.count ; i++, iterator = iterator->next) {
-        if (iterator->pcb.pid == pid) {
-            iterator->pcb.state = state;
+        if (iterator->pcb.pid == pid)
             return iterator;
-        }
-    }
-
-    // si no lo encontre busco en la cola de bloqueados
-    if (state != BLOCKED) {
-        iterator = blockedList.first;
-        while (iterator != NULL) {
-            if (iterator->pcb.pid == pid) {
-                iterator->pcb.state = state;
-                return iterator;
-            }
-        iterator = iterator->next;
-        }    
     }
     return NULL;
+}
+
+ProcessNode * searchBlockedNode(PID pid) {
+    ProcessNode * iterator = blockedList.first;
+    while (iterator != NULL) {
+        if (iterator->pcb.pid == pid)
+            return iterator;
+        iterator = iterator->next;
+    }
+    return NULL;
+}
+
+void changePriority(PID pid, Priority priority) {
+    ProcessNode * process = searchReadyNode(pid);
+    if (!process) process = searchBlockedNode(pid);
+    if (process) {
+        process->pcb.priority = priority;
+        if (process->priorityCounter > priority)
+            process->priorityCounter = priority;
+    }
 }
 
 void removeBlocked(ProcessNode * blocked) {
@@ -120,34 +118,51 @@ void removeBlocked(ProcessNode * blocked) {
 }
 
 void blockProcess(PID pid) {
-    ProcessNode * blocked = changeProcessState(pid, BLOCKED);
-    if (blocked) removeBlocked(blocked);
+    if (readyList.current->pcb.pid == pid) {
+        readyList.current->pcb.state = BLOCKED;
+        _int20();
+        return;
+    }
+    ProcessNode * process = searchReadyNode(pid);
+    if (process) {
+        process->pcb.state = TERMINATED;
+        removeBlocked(process);
+    }
 }
 
 void unblockProcess(PID pid) {
-    ProcessNode * current = blockedList.first;
-    while (current != NULL) {
-        if (current->pcb.pid == pid) {
-            current->pcb.state = READY;
+    ProcessNode * iterator = blockedList.first;
+    while (iterator != NULL) {
+        if (iterator->pcb.pid == pid) {
+            iterator->pcb.state = READY;
 
-            if (current->pcb.pid == blockedList.first->pcb.pid)
+            if (iterator->pcb.pid == blockedList.first->pcb.pid)
                 blockedList.first = blockedList.first->next;
 
-            current->prev = readyList.current;
-            current->next = readyList.current->next;
-            readyList.current->next->prev = current;
-            readyList.current->next = current;
+            iterator->prev = readyList.current;
+            iterator->next = readyList.current->next;
+            readyList.current->next->prev = iterator;
+            readyList.current->next = iterator;
             
             readyList.count++;
 
             return;
         }
-        current = current->next;
+        iterator = iterator->next;
     }
 }
 
 void terminateProcess(PID pid) {
-    changeProcessState(pid, TERMINATED);
+    if (readyList.current->pcb.pid == pid) {
+        readyList.current->pcb.state = TERMINATED;
+        _int20();
+        return;
+    }
+    ProcessNode * process = searchReadyNode(pid);
+    if (!process) process = searchBlockedNode(pid);
+    if (process) {
+        process->pcb.state = TERMINATED;
+    }
 }
 
 void removeTerminated() {
