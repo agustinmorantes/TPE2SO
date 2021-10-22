@@ -9,5 +9,5 @@ void schedulerAddProcess(PCB pcb);
 PID getpid(void);
 void blockProcess(void);
 void unblockProcess(PID pid);
-void terminateProcess(void);
+void terminateProcess(PID pid);
 void _int20();
