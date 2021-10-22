@@ -11,15 +11,6 @@ static PID pid = 0;
 
 #pragma pack(push, 1)
 typedef struct {
-    void* rip;
-    void* cs;
-    uint64_t rflags;
-    void* rsp;
-    void* ss;
-    uint64_t align;
-} ProcState;
-
-typedef struct {
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
@@ -36,9 +27,19 @@ typedef struct {
     uint64_t rbx;
     uint64_t rax;
 } RegState;
+
+typedef struct {
+    RegState regs;
+    void* rip;
+    void* cs;
+    uint64_t rflags;
+    void* rsp;
+    void* ss;
+    uint64_t align;
+} ProcState;
 #pragma pack(pop)
 
-PID processCreate(void* program, unsigned int argc, char** argv) {    
+PID processCreate(void* program, unsigned int argc, char** argv) {
     void* memStart = alloc(PROC_MEM);
     void* memEnd = (char*)memStart + PROC_MEM - 1;
 
@@ -46,19 +47,23 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
         *i = 0;
 
     ProcState* p = (ProcState*)((char*)memEnd - sizeof(ProcState) + 1);
-    RegState* registers = (RegState*)p - 1;
 
     p->cs = 8;
-    p->rsp = registers->rbp = memEnd;
+    p->rsp = p->regs.rbp = memEnd;
     p->rflags = 0x202;
     p->rip = program;
+
+    p->regs.rdi = (uint64_t)argc;
+    p->regs.rsi = (uint64_t)argv;
 
     PCB pcb;
 
     pcb.pid = pid++;
-    pcb.rsp = registers;
+    pcb.rsp = &(p->regs);
     pcb.state = READY;
     pcb.memStart = memStart;
+    pcb.argc = argc;
+    pcb.argv = argv;
 
     schedulerAddProcess(pcb);
 

@@ -14,6 +14,8 @@ typedef struct {
     State state;
     void* rsp;
     void* memStart;
+    unsigned int argc;
+    const char** argv;
 } PCB;
 
 PID processCreate(void* program, unsigned int argc, char** argv);
