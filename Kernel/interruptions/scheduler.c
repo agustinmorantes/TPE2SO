@@ -113,6 +113,7 @@ void removeBlocked(ProcessNode * blocked) {
         blockedList.first = blocked;
     } else {
         blocked->next = blockedList.first;
+        blockedList.first->prev = blocked;
         blockedList.first = blocked;
     }
 }
@@ -136,8 +137,13 @@ void unblockProcess(PID pid) {
         if (iterator->pcb.pid == pid) {
             iterator->pcb.state = READY;
 
-            if (iterator->pcb.pid == blockedList.first->pcb.pid)
+            if (iterator->pcb.pid == blockedList.first->pcb.pid) {
                 blockedList.first = blockedList.first->next;
+                blockedList.first->prev = NULL;
+            } else {
+                iterator->prev->next = iterator->next;
+                iterator->next->prev = iterator->prev;
+            } 
 
             iterator->prev = readyList.current;
             iterator->next = readyList.current->next;

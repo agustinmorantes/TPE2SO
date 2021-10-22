@@ -10,4 +10,5 @@ PID getpid(void);
 void blockProcess(PID pid);
 void unblockProcess(PID pid);
 void terminateProcess(PID pid);
+void changePriority(PID pid, Priority priority);
 void _int20(void);
