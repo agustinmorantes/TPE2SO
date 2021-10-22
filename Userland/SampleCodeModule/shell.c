@@ -7,12 +7,17 @@
 #define NULL 0
 #define MAX_CMD_LEN 1024
 
-static const Command* parseCommand(const char* input) {
+static const Command parseCommand(int argc, const char** argv) {
 	for(int i = 0; i < CMD_COUNT; i++) {
-		if(strcmp(input,commands[i].name) == 0) return &commands[i];
+		if(strcmp(argv[0],commands[i].name) != 0) continue;
+
+		Command c = commands[i];
+		c.isBackground = argv[argc-1][0] == '&';
+		return c; 
 	}
 
-	return 0;
+	Command c = {NULL,NULL,0};
+	return c;
 }
 
 static uint8_t split(char* input, char* buf[], uint8_t maxCount) {
@@ -46,12 +51,17 @@ void runShell() {
 		char* argv[64];
 		int argc = split(input, argv, 64);
 
-		const Command* cmd = parseCommand(argv[0]);
-		if(cmd != 0) {
-			cmd->handler(argc, (const char**)argv);
+		Command cmd = parseCommand(argc,argv);
+		if(cmd.handler == NULL) {
+			printf("Comando desconocido: %s\n", argv[0]);
+			continue;
 		}
-		else {
-			printf("Comando desconocido.\n");
+
+		if(cmd.isBackground) {
+			printf("DEBERIA SER BACKGROUND ESTO PERO NO FUNCA XD\n");
+			cmd.handler(argc, argv);
+		} else {
+			cmd.handler(argc, argv);
 		}
     }
 }

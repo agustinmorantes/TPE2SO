@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 #define CMD_COUNT 12
 
@@ -7,6 +8,7 @@ typedef int (*CmdHandler)(int argc, const char* argv[]);
 typedef struct {
 	const char* name;
 	CmdHandler handler;
+	uint8_t isBackground;
 } Command;
 
 int cmd_lscmd();
@@ -22,16 +24,16 @@ int cmd_roots();
 int cmd_suma();
 
 static Command commands[] = {
-	{"help",cmd_lscmd},
-	{"lscmd",cmd_lscmd},
-	{"clear",cmd_clear},
-	{"greet",cmd_greet},
-	{"time",cmd_time},
-    {"printmem", cmd_printmem},
-    {"inforeg", cmd_inforeg},
-	{"printcpufeatures", cmd_printcpufeatures},
-	{"divbyzero", cmd_divbyzero},
-	{"invalidopcode", cmd_invalidopcode},
-	{"roots", cmd_roots},
-	{"suma", cmd_suma}
+	{"help",cmd_lscmd,0},
+	{"lscmd",cmd_lscmd,0},
+	{"clear",cmd_clear,0},
+	{"greet",cmd_greet,0},
+	{"time",cmd_time,0},
+    {"printmem", cmd_printmem,0},
+    {"inforeg", cmd_inforeg,0},
+	{"printcpufeatures", cmd_printcpufeatures,0},
+	{"divbyzero", cmd_divbyzero,0},
+	{"invalidopcode", cmd_invalidopcode,0},
+	{"roots", cmd_roots,0},
+	{"suma", cmd_suma,0}
 };
