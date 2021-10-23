@@ -91,31 +91,31 @@ void testProc() {
 			newLine();
 			if (t == 3) {
 				_cli();
-				blockProcess(2);
+				blockProcess(3);
 				_sti();
 			}
 			if (t == 6) {
 				_cli();
-				blockProcess(3);
+				blockProcess(4);
 				_sti();
 			}
 			if (t == 9) {
 				_cli();
-				blockProcess(4);
+				blockProcess(5);
 				_sti();
 			}
 			if (t == 12) {
 				_cli();
-				unblockProcess(2);
 				unblockProcess(3);
 				unblockProcess(4);
+				unblockProcess(5);
 				_sti();
 			}
 			if (t == 15) {
 				_cli();
-				changePriority(2,LOW);
-				changePriority(3,MEDIUM);
-				changePriority(4,HIGH);
+				changePriority(3,LOW);
+				changePriority(4,MEDIUM);
+				changePriority(5,HIGH);
 				_sti();
 			}
 		}
