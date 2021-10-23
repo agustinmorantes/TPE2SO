@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <stdint.h>
+#include <memory_manager.h>
 
 #define MAX_SIZE 8192 // 1Mb
 #define START_MM 0x900000
