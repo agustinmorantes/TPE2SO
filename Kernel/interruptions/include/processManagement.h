@@ -20,6 +20,8 @@ typedef struct {
     State state;
     void* rsp;
     void* memStart;
+    unsigned int argc;
+    const char** argv;
     Priority priority;
 } PCB;
 

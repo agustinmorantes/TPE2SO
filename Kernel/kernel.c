@@ -134,11 +134,11 @@ int main()
 
 	_cli();
 
-	char* argv[1] = {0};
-	char* argvt[2] = {"time" ,0};
-	char* argva[2] = {"a" ,0};
-	char* argvb[2] = {"b" ,0};
-	char* argvc[2] = {"c" ,0};
+	char* argv[] = {0};
+	char* argvt[] = {"time" ,0};
+	char* argva[] = {"a" ,0};
+	char* argvb[] = {"b" ,0};
+	char* argvc[] = {"c" ,0};
 
 
 	PID pid = processCreate(&haltProc, 0, argv, HIGH);
@@ -146,10 +146,11 @@ int main()
 	printnum(pid);
 	newLine();
 
-	// pid = processCreate(sampleCodeModuleAddress, 0, argv, LOW);
-	// print("First process created with PID ");
-	// printnum(pid);
-	// newLine();
+	char* argv2[] = {"Hola!"};
+	pid = processCreate(sampleCodeModuleAddress, 1, argv2, LOW);
+	print("First process created with PID ");
+	printnum(pid);
+	newLine();
 
 	pid = processCreate(&testProc, 0, argvt, LOW);
 	print("Second process created with PID ");
