@@ -174,3 +174,15 @@ void free(void * ptr)
     freeBytesRemaining+= node->size;
     addNodeToFreeList((freeNode *)node);
 }
+
+size_t getFreeBytesRemaining() {
+    return freeBytesRemaining;
+}
+
+size_t getTotalBytes() {
+    return MAX_SIZE;
+}
+
+size_t getUsedMemory() {
+    return MAX_SIZE - freeBytesRemaining;
+}
