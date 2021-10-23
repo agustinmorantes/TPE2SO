@@ -9,6 +9,12 @@ typedef enum State {
     TERMINATED,
 } State;
 
+typedef enum Priority {
+    LOW = 1,
+    MEDIUM,
+    HIGH,
+} Priority;
+
 typedef struct {
     PID pid;
     State state;
@@ -16,7 +22,8 @@ typedef struct {
     void* memStart;
     unsigned int argc;
     const char** argv;
+    Priority priority;
 } PCB;
 
-PID processCreate(void* program, unsigned int argc, char** argv);
+PID processCreate(void* program, unsigned int argc, char** argv, Priority priority);
 void processRun(PID pid);

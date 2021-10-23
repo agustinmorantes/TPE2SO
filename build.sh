@@ -1,3 +1,3 @@
 #!/bin/bash
 docker start tp2so
-docker exec tp2so make
+docker exec -it tp2so ./dockerExecute.sh
