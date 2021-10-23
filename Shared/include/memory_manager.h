@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdint.h>
+#include <stdlib.h>
 
 void * alloc(unsigned long size);
 
