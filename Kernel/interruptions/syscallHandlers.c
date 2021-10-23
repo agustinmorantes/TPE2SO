@@ -2,6 +2,7 @@
 #include <console.h>
 #include <keyboard.h>
 #include <rtc.h>
+#include <scheduler.h>
 
 static uint8_t rawMode = 0;
 
@@ -111,3 +112,32 @@ void printmem(const void* ptr) {
         printchar(' ');
     }
 }
+
+void exit() {
+    terminateProcess(getpid());
+}
+
+PID getPidSyscall() {
+    return getpid();
+}
+
+int64_t kill(PID pid) {
+    return terminateProcess(pid);
+}
+
+int64_t changePrioritySyscall(PID pid, Priority priority) {
+    return changePriority(pid, priority);
+}
+
+int64_t blockProcessSyscall(PID pid) {
+    return blockProcess(pid);
+}
+
+int64_t unblockProcessSyscall(PID pid) {
+    return unblockProcess(pid);
+}
+
+void yieldSyscall(void) {
+    yield();
+}
+

@@ -38,7 +38,7 @@ typedef struct {
 } RegState;
 #pragma pack(pop)
 
-PID processCreate(void* program, unsigned int argc, char** argv) {    
+PID processCreate(void* program, unsigned int argc, char** argv, Priority priority) {    
     void* memStart = alloc(PROC_MEM);
     void* memEnd = (char*)memStart + PROC_MEM - 1;
 
@@ -59,6 +59,7 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     pcb.rsp = registers;
     pcb.state = READY;
     pcb.memStart = memStart;
+    pcb.priority = priority;
 
     schedulerAddProcess(pcb);
 

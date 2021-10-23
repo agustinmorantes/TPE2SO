@@ -4,6 +4,13 @@ GLOBAL _systime
 GLOBAL _sysclear
 GLOBAL _sysprintmem
 GLOBAL _systerminalraw
+GLOBAL _sysexit
+GLOBAL _sysgetpid
+GLOBAL _syskill
+GLOBAL _syschgpriority
+GLOBAL _sysblock
+GLOBAL _sysunblock
+GLOBAL _sysyield
 
 section .text
 
@@ -30,3 +37,17 @@ _sysprintmem:
     systemCall 4
 _systerminalraw:
     systemCall 5
+_sysexit:
+    systemCall 6
+_sysgetpid:
+    systemCall 7
+_syskill:
+    systemCall 8
+_syschgpriority:
+    systemCall 9
+_sysblock:
+    systemCall 10
+_sysunblock:
+    systemCall 11
+_sysyield:
+    systemCall 12
