@@ -11,6 +11,8 @@ GLOBAL _syschgpriority
 GLOBAL _sysblock
 GLOBAL _sysunblock
 GLOBAL _sysyield
+GLOBAL _syscreateprocess
+GLOBAL _syssetbackground
 
 section .text
 
@@ -51,3 +53,7 @@ _sysunblock:
     systemCall 11
 _sysyield:
     systemCall 12
+_syscreateprocess:
+    systemCall 13
+_syssetbackground:
+    systemCall 14

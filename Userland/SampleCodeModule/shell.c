@@ -7,6 +7,8 @@
 #define NULL 0
 #define MAX_CMD_LEN 1024
 
+int shellProcessWrapper(int argc, char** argv);
+
 static const Command parseCommand(int argc, const char** argv) {
 	for(int i = 0; i < CMD_COUNT; i++) {
 		if(strcmp(argv[0],commands[i].name) != 0) continue;
@@ -58,8 +60,9 @@ void runShell() {
 		}
 
 		if(cmd.isBackground) {
-			printf("DEBERIA SER BACKGROUND ESTO PERO NO FUNCA XD\n");
-			cmd.handler(argc, argv);
+			argv[argc] = (char*)cmd.handler;
+			PID pid = _syscreateprocess(&shellProcessWrapper, argc, argv);
+			_syschgpriority(pid, 1);
 		} else {
 			cmd.handler(argc, argv);
 		}

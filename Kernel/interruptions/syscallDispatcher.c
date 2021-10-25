@@ -47,6 +47,12 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 			yieldSyscall();
 			return 0;
 			break;
+		case 13:
+			return processCreate((void*)arg0, (unsigned int)arg1, (char**)arg2);
+			break;
+		case 14:
+			return setBackgroundSyscall((PID) arg0, (Background) arg1);
+			break;
 	}
 	return -1;
 }

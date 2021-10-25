@@ -27,12 +27,6 @@ static void * haltRsp;
 
 static uint64_t halt = 0;
 
-static int enabled = 0;
-
-void initScheduler() {
-    enabled = 1;
-}
-
 int schedulerAddProcess(PCB pcb) {
     if(pcb.pid == 0) {
         haltRsp = pcb.rsp;
@@ -80,6 +74,20 @@ ProcessNode * searchBlockedNode(PID pid) {
         iterator = iterator->next;
     }
     return NULL;
+}
+
+int setBackground(PID pid, Background background) {
+    ProcessNode * node = searchReadyNode(pid);
+    if(node == NULL) {
+        node = searchBlockedNode(pid);
+        if(node == NULL) return -1;
+    }
+    node->pcb.background = background;
+    return 0;
+}
+
+Background getBackground() {
+    return readyList.current->pcb.background;
 }
 
 int64_t changePriority(PID pid, Priority priority) {
@@ -201,7 +209,7 @@ void removeTerminated() {
 static int firstTime = 1;
 
 void * scheduler(void * rsp) {
-    if (haltRsp == 0 || !enabled) // not initialized
+    if (haltRsp == 0) // not initialized
         return rsp;
 
     if (halt)
