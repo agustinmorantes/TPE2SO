@@ -41,6 +41,9 @@ typedef struct {
 
 PID processCreate(void* program, unsigned int argc, char** argv, Priority priority) {    
     void* memStart = alloc(PROC_MEM);
+    if (memStart == NULL) 
+        return -1;
+    
     void* memEnd = (char*)memStart + PROC_MEM - 1;
 
     for(uint8_t* i = (uint8_t*)memStart; i <= memEnd; i++)
@@ -66,7 +69,10 @@ PID processCreate(void* program, unsigned int argc, char** argv, Priority priori
     pcb.argv = argv;
     pcb.priority = priority;
 
-    schedulerAddProcess(pcb);
+    if(schedulerAddProcess(pcb) < 0) {
+        free(memStart);
+        return NULL;
+    }
 
     return pcb.pid;
 }

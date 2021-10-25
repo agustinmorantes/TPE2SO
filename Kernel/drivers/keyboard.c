@@ -1,9 +1,10 @@
 #include <keyboard.h>
 #include <interrupts.h>
 #include <console.h>
+#include <scheduler.h>
 
 #define KEY_COUNT 105
-#define BUFF_LEN 1024
+#define BUFF_LEN 4096
 
 //Tabla de conversión de scancode a Key
 static const Key KeyTable[] = {
@@ -95,6 +96,7 @@ static uint8_t keysToRead = 0;
 
 // Para saber si el último scancode que lei fue 0xE0 (para teclas con scancode de 2 o más bytes) 
 static uint8_t isSpecialKey = 0; 
+static PID blockedpid;
 
 static Key buffer[BUFF_LEN]; 
 static uint32_t read_idx = 0;
@@ -145,10 +147,12 @@ uint8_t readAscii()
 
 //Espera en modo baja energía hasta que llegue una tecla
 void waitKey() {
+    blockedpid = getpid();
     while(!keysToRead) {
         write_idx = read_idx;
-        _hlt();
+        blockProcess(blockedpid);
     }
+    blockedpid = 0;
     keysToRead--;
 }
 
@@ -242,4 +246,6 @@ void handleKeyboardInterrupt() {
     //Si hay BUFF_LEN teclas para leer significa que estoy sobreescribiendo el buffer
     if (keysToRead > BUFF_LEN)
         keysToRead = BUFF_LEN;
+
+    if (blockedpid) unblockProcess(blockedpid);
 }

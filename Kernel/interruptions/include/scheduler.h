@@ -5,7 +5,7 @@
 void initScheduler(void);
 
 void * scheduler(void * rsp);
-void schedulerAddProcess(PCB pcb);
+int schedulerAddProcess(PCB pcb);
 PID getpid(void);
 int64_t blockProcess(PID pid);
 int64_t unblockProcess(PID pid);

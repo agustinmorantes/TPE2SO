@@ -33,13 +33,14 @@ void initScheduler() {
     enabled = 1;
 }
 
-void schedulerAddProcess(PCB pcb) {
+int schedulerAddProcess(PCB pcb) {
     if(pcb.pid == 0) {
         haltRsp = pcb.rsp;
-        return;
+        return 0;
     }
 
     ProcessNode * newReady = alloc(sizeof(ProcessNode));
+    if (newReady == NULL) return -1;
     newReady->pcb = pcb;
     newReady->priorityCounter = pcb.priority;
 
@@ -55,6 +56,7 @@ void schedulerAddProcess(PCB pcb) {
         readyList.current->prev = newReady;
     }
     readyList.count++;
+    return 0;
 }
 
 PID getpid() {
@@ -128,7 +130,7 @@ int64_t blockProcess(PID pid) {
     }
     ProcessNode * process = searchReadyNode(pid);
     if (process) {
-        process->pcb.state = TERMINATED;
+        process->pcb.state = BLOCKED;
         removeBlocked(process);
         return 0;
     }
@@ -136,29 +138,31 @@ int64_t blockProcess(PID pid) {
 }
 
 int64_t unblockProcess(PID pid) {
-    ProcessNode * iterator = blockedList.first;
-    while (iterator != NULL) {
-        if (iterator->pcb.pid == pid) {
-            iterator->pcb.state = READY;
+    ProcessNode * process = searchBlockedNode(pid);
+    if (process) {
+        process->pcb.state = READY;
 
-            if (iterator->pcb.pid == blockedList.first->pcb.pid) {
-                blockedList.first = blockedList.first->next;
-                blockedList.first->prev = NULL;
-            } else {
-                iterator->prev->next = iterator->next;
-                iterator->next->prev = iterator->prev;
-            } 
+        if (process->pcb.pid == blockedList.first->pcb.pid) {
+            blockedList.first = blockedList.first->next;
+            blockedList.first->prev = NULL;
+        } else {
+            process->prev->next = process->next;
+            process->next->prev = process->prev;
+        } 
 
-            iterator->prev = readyList.current;
-            iterator->next = readyList.current->next;
-            readyList.current->next->prev = iterator;
-            readyList.current->next = iterator;
-            
-            readyList.count++;
-
-            return 0;
+        if (readyList.count == 0) {
+            process->next = process;
+            process->prev = process;
+            readyList.current = process;
+        } else {
+            process->prev = readyList.current;
+            process->next = readyList.current->next;
+            readyList.current->next->prev = process;
+            readyList.current->next = process;
         }
-        iterator = iterator->next;
+        readyList.count++;
+
+        return 0;
     }
     return -1;
 }
@@ -221,6 +225,9 @@ void * scheduler(void * rsp) {
         readyList.current = readyList.current->next;
     }
     readyList.current->priorityCounter--;
+
+    while (readyList.current->pcb.state == TERMINATED)
+        removeTerminated();
 
     if (readyList.count == 0) {
         halt = 1;
