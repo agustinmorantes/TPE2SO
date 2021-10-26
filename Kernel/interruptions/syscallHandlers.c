@@ -26,6 +26,10 @@ int64_t write(uint64_t fd, const char* buf, uint64_t count) {
 
 int64_t read(uint64_t fd, char* buf, uint64_t count) {
     if(fd != 0) return -1;
+    if(getBackground()) {
+        blockProcess(getpid());
+        return 0;
+    }
 
     //Modo raw devuelve input de teclado sin ningun procesamiento
     if(rawMode) {
@@ -139,5 +143,9 @@ int64_t unblockProcessSyscall(PID pid) {
 
 void yieldSyscall(void) {
     yield();
+}
+
+int setBackgroundSyscall(PID pid, Background background) {
+    setBackground(pid, background);
 }
 

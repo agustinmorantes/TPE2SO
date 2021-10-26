@@ -15,6 +15,11 @@ typedef enum Priority {
     HIGH,
 } Priority;
 
+typedef enum Background {
+    FOREGROUND = 0,
+    BACKGROUND = 1
+} Background;
+
 typedef struct {
     PID pid;
     State state;
@@ -23,7 +28,8 @@ typedef struct {
     unsigned int argc;
     const char** argv;
     Priority priority;
+    Background background;
 } PCB;
 
-PID processCreate(void* program, unsigned int argc, char** argv, Priority priority);
+PID processCreate(void* program, unsigned int argc, char** argv);
 void processRun(PID pid);

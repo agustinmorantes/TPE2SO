@@ -6,6 +6,8 @@
 
 #define PROC_MEM_MB 1
 #define PROC_MEM (PROC_MEM_MB * 1024 * 1024)
+#define DEFAULT_PRIORITY MEDIUM
+#define DEFAULT_BACKGROUND BACKGROUND
 
 static PID pid = 0;
 
@@ -39,7 +41,7 @@ typedef struct {
 } ProcState;
 #pragma pack(pop)
 
-PID processCreate(void* program, unsigned int argc, char** argv, Priority priority) {    
+PID processCreate(void* program, unsigned int argc, char** argv) {
     void* memStart = alloc(PROC_MEM);
     if (memStart == NULL) 
         return -1;
@@ -67,7 +69,8 @@ PID processCreate(void* program, unsigned int argc, char** argv, Priority priori
     pcb.memStart = memStart;
     pcb.argc = argc;
     pcb.argv = argv;
-    pcb.priority = priority;
+    pcb.priority = DEFAULT_PRIORITY;
+    pcb.background = DEFAULT_BACKGROUND;
 
     if(schedulerAddProcess(pcb) < 0) {
         free(memStart);

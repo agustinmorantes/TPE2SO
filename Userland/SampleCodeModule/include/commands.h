@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#define CMD_COUNT 12
+#define CMD_COUNT 13
 
 typedef int (*CmdHandler)(int argc, const char* argv[]);
 
@@ -22,6 +22,7 @@ int cmd_divbyzero();
 int cmd_invalidopcode();
 int cmd_roots();
 int cmd_suma();
+int cmd_background_test();
 
 static Command commands[] = {
 	{"help",cmd_lscmd,0},
@@ -35,5 +36,6 @@ static Command commands[] = {
 	{"divbyzero", cmd_divbyzero,0},
 	{"invalidopcode", cmd_invalidopcode,0},
 	{"roots", cmd_roots,0},
-	{"suma", cmd_suma,0}
+	{"suma", cmd_suma,0},
+	{"bgtest",cmd_background_test,0}
 };

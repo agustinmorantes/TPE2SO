@@ -109,3 +109,13 @@ int cmd_suma() {
     printf("El resultado es: %d\n", a + b);
     return 0;
 }
+
+int cmd_background_test() {
+    Time t = getCurrentTime();
+    while(1) {
+        if(t.seconds != (t = getCurrentTime()).seconds && t.seconds % 3 == 0) {
+            printCurrentTime();
+            printf("\n");
+        }
+    }
+}

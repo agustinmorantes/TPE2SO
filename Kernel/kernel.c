@@ -47,80 +47,9 @@ void *initializeKernelBinary()
 
 	clearBSS(&bss, &endOfKernel - &bss);
 	
-	// Interrupciones
-	load_idt();
-	
 	initVideo();
 
 	return getStackBase();
-}
-
-void aProc() {
-	while (1) { 
-		_cli();
-		printchar('a');
-		_hlt();
-	}
-}
-
-void bProc() {
-	while (1) {
-		_cli();
-		printchar('b');	
-		_hlt();
-	} 
-}
-
-void cProc() {
-	while (1) {
-		_cli();
-		printchar('c');	
-		_hlt();
-	} 
-}
-
-void testProc() {
-	int t = 0;
-	int flag = 1;
-	while(1) {
-		int lastT = t;
-		t = seconds_elapsed();
-		if(t != lastT && t%3 == 0) {
-			print("Time:");
-			printnum(t);
-			newLine();
-			if (t == 3) {
-				_cli();
-				blockProcess(3);
-				_sti();
-			}
-			if (t == 6) {
-				_cli();
-				blockProcess(4);
-				_sti();
-			}
-			if (t == 9) {
-				_cli();
-				blockProcess(5);
-				_sti();
-			}
-			if (t == 12) {
-				_cli();
-				unblockProcess(3);
-				unblockProcess(4);
-				unblockProcess(5);
-				_sti();
-			}
-			if (t == 15) {
-				_cli();
-				changePriority(3,LOW);
-				changePriority(4,MEDIUM);
-				changePriority(5,HIGH);
-				_sti();
-			}
-		}
-		_hlt();
-	}
 }
 
 void haltProc() {
@@ -135,35 +64,20 @@ int main()
 	_cli();
 
 	char* argv[] = {0};
-	char* argvt[] = {"time" ,0};
-	char* argva[] = {"a" ,0};
-	char* argvb[] = {"b" ,0};
-	char* argvc[] = {"c" ,0};
 
-
-	PID pid = processCreate(&haltProc, 0, argv, HIGH);
+	PID pid = processCreate(&haltProc, 0, argv);
 	print("Halt process created with PID ");
 	printnum(pid);
 	newLine();
 
-	char* argv2[] = {"Hola!"};
-	pid = processCreate(sampleCodeModuleAddress, 1, argv2, LOW);
+	pid = processCreate(sampleCodeModuleAddress, 1, argv);
+	changePriority(pid, HIGH);
+	setBackground(pid, FOREGROUND);
 	print("First process created with PID ");
 	printnum(pid);
 	newLine();
 
-	pid = processCreate(&testProc, 0, argvt, LOW);
-	print("Second process created with PID ");
-	printnum(pid);
-	newLine();
-	
-	pid = processCreate(&aProc, 0, argva, HIGH);
-
-	pid = processCreate(&bProc, 0, argvb, MEDIUM);
-
-	pid = processCreate(&cProc, 0, argvc, LOW);
-
-	initScheduler();
+	load_idt();
 
 	println("Waiting for processes to run...");
 	while(1) _hlt();
