@@ -32,3 +32,4 @@ int64_t _sysunblock(PID pid);
 void _sysyield();
 PID _syscreateprocess(void* program, unsigned int argc, char** argv);
 int _syssetbackground(PID pid, Background background);
+int _sysmapstdfds(PID pid, int stdin, int stdout);

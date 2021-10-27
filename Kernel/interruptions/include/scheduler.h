@@ -13,3 +13,5 @@ int64_t terminateProcess(PID pid);
 int64_t changePriority(PID pid, Priority priority);
 void yield(void);
 void _int20(void);
+int mapStdFds(PID pid, int stdin, int stdout);
+int fdLocalToGlobal(int fd);

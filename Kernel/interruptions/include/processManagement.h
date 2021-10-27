@@ -29,6 +29,8 @@ typedef struct {
     const char** argv;
     Priority priority;
     Background background;
+    int stdinFd;
+    int stdoutFd;
 } PCB;
 
 PID processCreate(void* program, unsigned int argc, char** argv);

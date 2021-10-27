@@ -17,4 +17,5 @@ int64_t changePrioritySyscall(PID pid, Priority priority);
 int64_t blockProcessSyscall(PID pid);
 int64_t unblockProcessSyscall(PID pid);
 void yieldSyscall(void);
-
+int setBackgroundSyscall(PID pid, Background background);
+int mapStdFdsSyscall(PID pid, int stdin, int stdout);

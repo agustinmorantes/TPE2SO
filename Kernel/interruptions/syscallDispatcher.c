@@ -53,6 +53,9 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 		case 14:
 			return setBackgroundSyscall((PID) arg0, (Background) arg1);
 			break;
+		case 15:
+			return mapStdFdsSyscall((PID) arg0, (int) arg1, (int) arg2);
+			break;
 	}
 	return -1;
 }

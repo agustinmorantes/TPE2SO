@@ -119,3 +119,11 @@ int cmd_background_test() {
         }
     }
 }
+
+int cmd_fdMap_test() {
+    PID pid = _sysgetpid();
+    _sysmapstdfds(pid, -1, -1);
+    printf("Esto no debería printearse");
+    _sysmapstdfds(pid, 0, 1);
+    return 1;
+}

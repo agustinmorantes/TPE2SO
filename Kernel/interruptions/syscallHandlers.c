@@ -7,6 +7,8 @@
 static uint8_t rawMode = 0;
 
 int64_t write(uint64_t fd, const char* buf, uint64_t count) {
+    fd = fdLocalToGlobal(fd);
+
     if(fd == 1) {
         for(int i = 0; i < count; i++) {
             printchar(buf[i]);
@@ -21,11 +23,19 @@ int64_t write(uint64_t fd, const char* buf, uint64_t count) {
         return count;
     }
 
+    printcln("write: invalid file descriptor", Black, Red);
+
     return -1;
 }
 
 int64_t read(uint64_t fd, char* buf, uint64_t count) {
-    if(fd != 0) return -1;
+    fd = fdLocalToGlobal(fd);
+
+    if(fd != 0) {
+        printcln("read: invalid file descriptor", Black, Red);
+        return -1;
+    }
+
     if(getBackground()) {
         blockProcess(getpid());
         return 0;
@@ -147,5 +157,9 @@ void yieldSyscall(void) {
 
 int setBackgroundSyscall(PID pid, Background background) {
     setBackground(pid, background);
+}
+
+int mapStdFdsSyscall(PID pid, int stdin, int stdout) {
+    mapStdFds(pid, stdin, stdout);
 }
 

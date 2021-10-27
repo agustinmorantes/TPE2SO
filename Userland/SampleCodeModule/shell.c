@@ -7,8 +7,6 @@
 #define NULL 0
 #define MAX_CMD_LEN 1024
 
-int shellProcessWrapper(int argc, char** argv);
-
 static const Command parseCommand(int argc, const char** argv) {
 	for(int i = 0; i < CMD_COUNT; i++) {
 		if(strcmp(argv[0],commands[i].name) != 0) continue;
@@ -40,6 +38,15 @@ void readinput(char* outputBuf) {
 	printf("> ");
 	int len = _sysread(0, outputBuf, MAX_CMD_LEN);
 	outputBuf[len-1] = 0;
+}
+
+int shellProcessWrapper(int argc, char** argv) {
+	PID pid = _sysgetpid();
+    printf("[SHELL] Proceso Background con PID %d\n", pid);
+    int retcode = ((CmdHandler)argv[argc])(argc-1, argv);
+	_sysmapstdfds(pid, 0, 1);
+    printf("[SHELL] Process exit code: %d", retcode);
+    _sysexit();
 }
 
 void runShell() {
