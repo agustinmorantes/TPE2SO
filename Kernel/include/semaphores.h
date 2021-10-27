@@ -3,9 +3,13 @@
 #include <stdint.h>
 #include <spinlock.h>
 #include <processManagement.h>
+#include <scheduler.h>
+#include <memory_manager.h>
 
-semaphore * open();
+typedef int semID;
 
-void wait(semaphore * sem);
+void semOpen(semID id, uint64_t value);
 
-void post(semaphore * sem);
+void semWait(semID id);
+
+void semPost(semID id);
