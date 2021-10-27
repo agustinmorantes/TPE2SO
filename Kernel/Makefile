@@ -3,11 +3,11 @@ include Makefile.inc
 KERNEL=kernel.bin
 
 # Directorios Include
-INCLUDE_DIRS=include interruptions/include drivers/include memoryManager/include
+INCLUDE_DIRS=include interruptions/include drivers/include memoryManager/include pipe/include
 INCLUDES=$(addprefix -I ,$(INCLUDE_DIRS))
 
 # Codigo .c y .asm
-SOURCES=$(wildcard *.c) $(wildcard interruptions/*.c) $(wildcard drivers/*.c) $(wildcard memoryManager/*.c)
+SOURCES=$(wildcard *.c) $(wildcard interruptions/*.c) $(wildcard drivers/*.c) $(wildcard memoryManager/*.c) $(wildcard pipe/*.c)
 SOURCES_ASM=$(wildcard asm/*.asm) $(wildcard interruptions/asm/*.asm) $(wildcard drivers/asm/*.asm)
 
 # Carpeta y archivos objeto 
