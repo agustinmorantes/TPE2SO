@@ -13,7 +13,7 @@ typedef struct fd {
 
 static FD fdTable[MAX_FD]; 
 
-uint64_t initfd(fdType type, PIPE pipe) {
+int64_t initfd(fdType type, PIPE pipe) {
     for(size_t i = 3; i < MAX_FD; i++){
         if(fdTable[i].ref == 0) {
             fdTable[i].ref = 1;
@@ -25,27 +25,32 @@ uint64_t initfd(fdType type, PIPE pipe) {
     return -1;
 }
 
-void closefd(uint64_t id) {
+int64_t closefd(uint64_t id) {
+    if (id > MAX_FD || fdTable[id].ref == 0)
+        return -1;
+
     fdTable[id].ref--;
     if (fdTable[id].ref == 0) {
         closePipe(fdTable[id].pipe, fdTable[id].type);
         fdTable[id].pipe = NULL;
     }
+    return 0;
 }
 
 void fddup(uint64_t id) {
-    if (fdTable[id].ref)
-        fdTable[id].ref++;
+    if (id > MAX_FD || fdTable[id].ref == 0)
+        return;
+    fdTable[id].ref++;
 }
 
 int64_t readfd(uint64_t fd, char* buf, uint64_t count) {
-    if (fdTable[fd].type != READ) 
+    if (fd > MAX_FD || fdTable[fd].type != READ) 
         return -1;
     return readPipe(fdTable[fd].pipe, buf, count);    
 }
 
 int64_t writefd(uint64_t fd, const char* buf, uint64_t count) {
-    if (fdTable[fd].type != WRITE) 
+    if (fd > MAX_FD || fdTable[fd].type != WRITE) 
         return -1;
     return writePipe(fdTable[fd].pipe, buf, count);    
 }

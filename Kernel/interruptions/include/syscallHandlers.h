@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <rtc.h>
+#include <pipe.h>
 #include <processManagement.h>
 
 int64_t write(uint64_t fd, const char* buf, uint64_t count);
@@ -17,4 +18,7 @@ int64_t changePrioritySyscall(PID pid, Priority priority);
 int64_t blockProcessSyscall(PID pid);
 int64_t unblockProcessSyscall(PID pid);
 void yieldSyscall(void);
-
+int64_t pipeSyscall(uint64_t fd[2]);
+int64_t close(uint64_t fd);
+int64_t mkfifoSyscall(uint64_t id);
+int64_t openFifoSyscall(uint64_t id, fdType type);

@@ -13,6 +13,10 @@ GLOBAL _sysunblock
 GLOBAL _sysyield
 GLOBAL _syscreateprocess
 GLOBAL _syssetbackground
+GLOBAL _syspipe
+GLOBAL _sysclose
+GLOBAL _sysmkfifo
+GLOBAL _sysopenfifo
 
 section .text
 
@@ -57,3 +61,11 @@ _syscreateprocess:
     systemCall 13
 _syssetbackground:
     systemCall 14
+_syspipe:
+    systemCall 15
+_sysclose:
+    systemCall 16
+_sysmkfifo:
+    systemCall 17
+_sysopenfifo:
+    systemCall 18

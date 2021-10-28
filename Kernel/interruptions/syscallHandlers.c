@@ -3,6 +3,8 @@
 #include <keyboard.h>
 #include <rtc.h>
 #include <scheduler.h>
+#include <fd.h>
+#include <pipe.h>
 
 static uint8_t rawMode = 0;
 
@@ -21,58 +23,59 @@ int64_t write(uint64_t fd, const char* buf, uint64_t count) {
         return count;
     }
 
-    return -1;
+    return writefd(fd, buf ,count);
 }
 
 int64_t read(uint64_t fd, char* buf, uint64_t count) {
-    if(fd != 0) return -1;
-    if(getBackground()) {
-        blockProcess(getpid());
-        return 0;
-    }
+    if(fd == 0) {
+        if(getBackground()) {
+            blockProcess(getpid());
+            return 0;
+        }
 
-    //Modo raw devuelve input de teclado sin ningun procesamiento
-    if(rawMode) {
+        //Modo raw devuelve input de teclado sin ningun procesamiento
+        if(rawMode) {
+            int i;
+            for(i = 0; i < count; i++) {
+                buf[i] = readAscii();
+            }
+            return i;
+        }
+
         int i;
         for(i = 0; i < count; i++) {
-            buf[i] = readAscii();
-        }
-        return i;
-    }
+            char c = readAscii();
 
-    int i;
-    for(i = 0; i < count; i++) {
-        char c = readAscii();
-
-        if(c == '\t') {
-            i--;
-            continue;
-        }
-
-        //Backspace
-        if(c == 8) {
-            //Si llego a la pos minima no sigo borrando
-            if(i <= 0) {
+            if(c == '\t') {
                 i--;
                 continue;
             }
 
-            i-=2;
-        }
-        else buf[i] = c; //Escribo el caracter al buffer
+            //Backspace
+            if(c == 8) {
+                //Si llego a la pos minima no sigo borrando
+                if(i <= 0) {
+                    i--;
+                    continue;
+                }
+                i-=2;
+            }
+            else buf[i] = c; //Escribo el caracter al buffer
         
-        //Imprimo en pantalla el caracter
-        printchar(c);
+            //Imprimo en pantalla el caracter
+            printchar(c);
 
-        //Si recibo un enter dejo de leer del teclado y devuelvo
-        if(c == '\n') {
-            i++;
-            break;
+            //Si recibo un enter dejo de leer del teclado y devuelvo
+            if(c == '\n') {
+                i++;
+                break;
+            }
         }
-    }
     
+        return i; //Devuelvo la cantidad de caracteres que leí
+    }
 
-    return i; //Devuelvo la cantidad de caracteres que leí
+    return readfd(fd, buf, count);
 }
 
 int64_t time(Time* res) {
@@ -148,4 +151,22 @@ void yieldSyscall(void) {
 int setBackgroundSyscall(PID pid, Background background) {
     setBackground(pid, background);
 }
+
+int64_t pipeSyscall(uint64_t fd[2]) {
+    return openPipe(fd);
+}
+
+int64_t close(uint64_t fd) {
+    return closefd(fd);
+}
+
+int64_t mkfifoSyscall(uint64_t id) {
+    return mkfifo(id);
+}
+
+int64_t openFifoSyscall(uint64_t id, fdType type) {
+    return openFifo(id, type);
+}
+
+
 

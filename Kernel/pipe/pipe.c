@@ -6,6 +6,7 @@
 #include <scheduler.h>
 
 #define PIPE_BUF 10
+#define MAX_FIFO 64
 
 struct Pipe {
     char buf[PIPE_BUF];
@@ -19,12 +20,57 @@ struct Pipe {
     // sem readqueue
 };
 
-uint64_t openPipe(uint64_t fd[2]) {
+typedef struct fifo {
+    uint64_t id;
+    uint64_t readfd;
+    uint64_t writefd;
+} FIFO;
+
+static FIFO fifoTable[MAX_FIFO];
+
+int64_t mkfifo(uint64_t id) {
+    int64_t k = -1;
+    for (int64_t i = 0; i < MAX_FIFO; i++) {
+        if (fifoTable[i].id == id) // ya existe
+            return -1;
+        if (fifoTable[i].id == 0) // encontre lugar
+            k = i;
+    }
+
+    if (k >= 0) {
+        uint64_t fd[2];
+        if (openPipe(fd) < 0)
+            return -1;
+        fifoTable[k].id = id;
+        fifoTable[k].readfd = fd[0];
+        fifoTable[k].writefd = fd[1];
+        return 0;
+    }
+    return -1;
+}
+
+int64_t openFifo(uint64_t id, fdType type) {
+    for (int64_t i = 0; i < MAX_FIFO; i++) {
+        if (fifoTable[i].id == id) {
+            if (type == READ) {
+                fddup(fifoTable[i].readfd);
+                return fifoTable[i].readfd;
+            }
+            if (type == WRITE) {
+                fddup(fifoTable[i].writefd);
+                return fifoTable[i].writefd;
+            }
+        }
+    }
+    return -1;
+}
+
+int64_t openPipe(uint64_t fd[2]) {
     PIPE pipe = alloc(sizeof(struct Pipe));
     if (pipe == NULL)
         return -1;
 
-    uint64_t id;
+    int64_t id;
 
     id = initfd(READ, pipe);
     if (id < 0)  {
