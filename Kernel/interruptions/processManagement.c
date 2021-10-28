@@ -71,6 +71,8 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     pcb.argv = argv;
     pcb.priority = DEFAULT_PRIORITY;
     pcb.background = DEFAULT_BACKGROUND;
+    pcb.stdinFd = 0;
+    pcb.stdoutFd = 1;
 
     if(schedulerAddProcess(pcb) < 0) {
         free(memStart);

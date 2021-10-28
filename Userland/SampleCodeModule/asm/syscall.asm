@@ -17,6 +17,7 @@ GLOBAL _syspipe
 GLOBAL _sysclose
 GLOBAL _sysmkfifo
 GLOBAL _sysopenfifo
+GLOBAL _sysmapstdfds
 
 section .text
 
@@ -69,3 +70,5 @@ _sysmkfifo:
     systemCall 17
 _sysopenfifo:
     systemCall 18
+_sysmapstdfds:
+    systemCall 19

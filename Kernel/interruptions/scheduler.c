@@ -76,18 +76,49 @@ ProcessNode * searchBlockedNode(PID pid) {
     return NULL;
 }
 
-int setBackground(PID pid, Background background) {
+ProcessNode * searchNode(PID pid) {
     ProcessNode * node = searchReadyNode(pid);
-    if(node == NULL) {
-        node = searchBlockedNode(pid);
-        if(node == NULL) return -1;
-    }
+    if(node == NULL) node = searchBlockedNode(pid);
+    if(node == NULL) return NULL;
+    return node;
+}
+
+int setBackground(PID pid, Background background) {
+    ProcessNode * node = searchNode(pid);
+    if(node == NULL) return -1;
+
     node->pcb.background = background;
     return 0;
 }
 
 Background getBackground() {
     return readyList.current->pcb.background;
+}
+
+int mapStdFds(PID pid, int stdin, int stdout) {
+    //TODO: Chequear si existen los FD
+
+    ProcessNode* node = searchNode(pid);
+    if(node == NULL) return -1;
+
+    node->pcb.stdinFd = stdin;
+    node->pcb.stdoutFd = stdout;
+    return 0;
+}
+
+int fdLocalToGlobal(int fd) {
+    switch (fd)
+    {
+    case 0:
+        return readyList.current->pcb.stdinFd;
+        break;
+    case 1:
+        return readyList.current->pcb.stdoutFd;
+        break;
+    default:
+        return fd;
+        break;
+    }
 }
 
 int64_t changePriority(PID pid, Priority priority) {

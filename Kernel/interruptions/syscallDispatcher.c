@@ -64,7 +64,10 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 			break;
 		case 18: 
 			return openFifoSyscall((uint64_t) arg0, (fdType) arg1);
-			break;
+      break;
+		case 19:
+			return mapStdFdsSyscall((PID) arg0, (int) arg1, (int) arg2);
+      break;
 	}
 	return -1;
 }

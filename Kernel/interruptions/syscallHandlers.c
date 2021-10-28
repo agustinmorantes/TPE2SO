@@ -9,6 +9,8 @@
 static uint8_t rawMode = 0;
 
 int64_t write(uint64_t fd, const char* buf, uint64_t count) {
+    fd = fdLocalToGlobal(fd);
+
     if(fd == 1) {
         for(int i = 0; i < count; i++) {
             printchar(buf[i]);
@@ -27,6 +29,7 @@ int64_t write(uint64_t fd, const char* buf, uint64_t count) {
 }
 
 int64_t read(uint64_t fd, char* buf, uint64_t count) {
+    fd = fdLocalToGlobal(fd);
     if(fd == 0) {
         if(getBackground()) {
             blockProcess(getpid());
@@ -168,5 +171,6 @@ int64_t openFifoSyscall(uint64_t id, fdType type) {
     return openFifo(id, type);
 }
 
-
-
+int mapStdFdsSyscall(PID pid, int stdin, int stdout) {
+    mapStdFds(pid, stdin, stdout);
+}
