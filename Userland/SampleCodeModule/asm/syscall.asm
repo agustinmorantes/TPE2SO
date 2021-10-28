@@ -13,6 +13,7 @@ GLOBAL _sysunblock
 GLOBAL _sysyield
 GLOBAL _syscreateprocess
 GLOBAL _syssetbackground
+GLOBAL _sysmapstdfds
 
 section .text
 
@@ -57,3 +58,5 @@ _syscreateprocess:
     systemCall 13
 _syssetbackground:
     systemCall 14
+_sysmapstdfds:
+    systemCall 15
