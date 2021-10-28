@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <fd.h>
 
 typedef int PID;
 
@@ -29,8 +30,7 @@ typedef struct {
     const char** argv;
     Priority priority;
     Background background;
-    int stdinFd;
-    int stdoutFd;
+    int fd[MAX_FD];
 } PCB;
 
 PID processCreate(void* program, unsigned int argc, char** argv);

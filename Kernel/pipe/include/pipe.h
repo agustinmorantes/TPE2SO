@@ -15,3 +15,5 @@ int64_t writePipe(PIPE pipe, const char* buf, uint64_t count);
 
 int64_t openFifo(uint64_t id, fdType type);
 int64_t mkfifo(uint64_t id);
+// no la borra instantaneamente, pero prohibe a mas procesos abrirla y se cerrara cuando todos los procesos cierren los fds
+int64_t rmFifo(uint64_t id);

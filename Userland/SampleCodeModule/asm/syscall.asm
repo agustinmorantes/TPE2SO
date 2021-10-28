@@ -18,6 +18,7 @@ GLOBAL _sysclose
 GLOBAL _sysmkfifo
 GLOBAL _sysopenfifo
 GLOBAL _sysmapstdfds
+GLOBAL _sysrmfifo
 
 section .text
 
@@ -72,3 +73,5 @@ _sysopenfifo:
     systemCall 18
 _sysmapstdfds:
     systemCall 19
+_sysrmfifo:
+    systemCall 20

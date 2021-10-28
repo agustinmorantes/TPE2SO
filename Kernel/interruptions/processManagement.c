@@ -4,8 +4,7 @@
 #include <interrupts.h>
 #include <scheduler.h>
 
-#define PROC_MEM_MB 1
-#define PROC_MEM (PROC_MEM_MB * 1024 * 1024)
+#define PROC_MEM (8*1024)
 #define DEFAULT_PRIORITY MEDIUM
 #define DEFAULT_BACKGROUND BACKGROUND
 
@@ -71,12 +70,15 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     pcb.argv = argv;
     pcb.priority = DEFAULT_PRIORITY;
     pcb.background = DEFAULT_BACKGROUND;
-    pcb.stdinFd = 0;
-    pcb.stdoutFd = 1;
+    pcb.fd[0] = 0;
+    pcb.fd[1] = 1;
+    pcb.fd[2] = 2;
+    for (int i = 3; i < MAX_FD; i++)
+        pcb.fd[i] = -1;
 
     if(schedulerAddProcess(pcb) < 0) {
         free(memStart);
-        return NULL;
+        return -1;
     }
 
     return pcb.pid;

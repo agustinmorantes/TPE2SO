@@ -5,7 +5,7 @@
 #include <memory_manager.h>
 #include <scheduler.h>
 
-#define PIPE_BUF 10
+#define PIPE_BUF 4096
 #define MAX_FIFO 64
 
 struct Pipe {
@@ -29,6 +29,7 @@ typedef struct fifo {
 static FIFO fifoTable[MAX_FIFO];
 
 int64_t mkfifo(uint64_t id) {
+    if (id == 0) return -1; // 0 not a valid id
     int64_t k = -1;
     for (int64_t i = 0; i < MAX_FIFO; i++) {
         if (fifoTable[i].id == id) // ya existe
@@ -50,6 +51,7 @@ int64_t mkfifo(uint64_t id) {
 }
 
 int64_t openFifo(uint64_t id, fdType type) {
+    if (id == 0) return -1; // 0 not a valid id
     for (int64_t i = 0; i < MAX_FIFO; i++) {
         if (fifoTable[i].id == id) {
             if (type == READ) {
@@ -60,6 +62,21 @@ int64_t openFifo(uint64_t id, fdType type) {
                 fddup(fifoTable[i].writefd);
                 return fifoTable[i].writefd;
             }
+        }
+    }
+    return -1;
+}
+
+int64_t rmFifo(uint64_t id) {
+    if (id == 0) return -1; // 0 not a valid id
+    for (int64_t i = 0; i < MAX_FIFO; i++) {
+        if (fifoTable[i].id == id) {
+            fifoTable[i].id = 0;
+            closefd(fifoTable[i].readfd);
+            closefd(fifoTable[i].writefd);
+            fifoTable[i].readfd = 0;
+            fifoTable[i].writefd = 0;
+            return 0;
         }
     }
     return -1;

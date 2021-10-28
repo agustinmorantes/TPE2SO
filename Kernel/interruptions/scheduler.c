@@ -96,29 +96,28 @@ Background getBackground() {
 }
 
 int mapStdFds(PID pid, int stdin, int stdout) {
-    //TODO: Chequear si existen los FD
-
     ProcessNode* node = searchNode(pid);
     if(node == NULL) return -1;
+    if (node->pcb.fd[stdin] == -1 || node->pcb.fd[stdout] == -1) 
+        return -1;
 
-    node->pcb.stdinFd = stdin;
-    node->pcb.stdoutFd = stdout;
+    node->pcb.fd[0] = stdin;
+    node->pcb.fd[1] = stdout;
     return 0;
 }
 
 int fdLocalToGlobal(int fd) {
-    switch (fd)
-    {
-    case 0:
-        return readyList.current->pcb.stdinFd;
-        break;
-    case 1:
-        return readyList.current->pcb.stdoutFd;
-        break;
-    default:
-        return fd;
-        break;
-    }
+    return readyList.current->pcb.fd[fd];
+}
+
+void addFd(uint32_t fd) {
+    if (fd >= MAX_FD) return;
+    readyList.current->pcb.fd[fd] = fd;
+}
+
+void removeFd(uint32_t fd) {
+    if (fd >= MAX_FD) return;
+    readyList.current->pcb.fd[fd] = -1;
 }
 
 int64_t changePriority(PID pid, Priority priority) {
