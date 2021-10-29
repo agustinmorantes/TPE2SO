@@ -58,6 +58,8 @@ int64_t read(uint64_t fd, char* buf, uint64_t count) {
                 continue;
             }
 
+            if(c == -1) return -1;
+
             //Backspace
             if(c == 8) {
                 //Si llego a la pos minima no sigo borrando

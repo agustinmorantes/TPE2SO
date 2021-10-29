@@ -127,3 +127,128 @@ int cmd_fdMap_test() {
     _sysmapstdfds(pid, 0, 1);
     return 1;
 }
+
+int cmd_kill(int argc, const char** argv) {
+    if (argc < 2) {
+        printf("USE: kill [PID]\n");
+        return -1;
+    }
+
+    int pid = -1;
+    strToIntBase(argv[1], strlen(argv[1]), 10, &pid, 1);
+
+    if (pid == -1) {
+        printf("USO: kill [PID]\n");
+        return -1;
+    }
+
+    if(_syskill(pid) < 0) {
+        printf("Couldn't kill process with PID %d\n", pid);
+        return -1;
+    }
+
+    return 0;
+}
+
+int cmd_nice(int argc, const char** argv) {
+    if (argc < 2) {
+        printf("USE: nice [PID]\n");
+        return -1;
+    }
+
+    int pid = -1;
+    Priority priority = -1;
+    strToIntBase(argv[1], strlen(argv[1]), 10, &pid, 1);
+    strToIntBase(argv[2], strlen(argv[2]), 10, &priority, 1);
+
+    if (pid == -1) {
+        printf("USE: nice [PID] [PRIORITY(1-3)]\n");
+        return -1;
+    }
+
+    if(priority < 1 || priority > 3) {
+        printf("Invalid priority. USE: nice [PID] [PRIORITY(1-3)]\n");
+        return -1;
+    }
+
+    if(_syschgpriority(pid, priority) < 0) {
+        printf("Couldn't change priority of process with PID %d\n", pid);
+        return -1;
+    }
+
+    return 0;
+}
+
+int cmd_block(int argc, const char** argv) {
+    if (argc < 2) {
+        printf("USE: block [PID]\n");
+        return -1;
+    }
+
+    int pid = -1;
+    strToIntBase(argv[1], strlen(argv[1]), 10, &pid, 1);
+
+    if (pid == -1) {
+        printf("USE: block [PID]\n");
+        return -1;
+    }
+
+    if(_sysblock(pid) < 0 && _sysunblock(pid) < 0) {
+        printf("Couldn't block/unblock process with PID %d\n", pid);
+        return -1;
+    }
+
+    return 0;
+}
+
+int cmd_cat() {
+    char buffer[1024];
+    int bytesRead = 0;
+    while((bytesRead = _sysread(STDIN, buffer, 1024)) > 0) {
+        _syswrite(1, buffer, bytesRead);
+    }
+
+    return 0;
+}
+
+int cmd_wc() {
+    char buffer[1024];
+    int bytesRead = 0;
+    int words = 1;
+    int lines = 1;
+    while((bytesRead = _sysread(STDIN, buffer, 1024)) > 0) {
+        for(int i = 0; i < bytesRead; i++) {
+            if(buffer[i] == '\n') 
+                lines++;
+
+            if(buffer[i] == ' ' || buffer[i] == '\n') 
+                words++;
+        }
+    }
+
+    printf("\nLines: %d\n", lines);
+    return 0;
+}
+
+int cmd_filter() {
+    char buffer[1024];
+    int bytesRead = 0;
+    while((bytesRead = _sysread(STDIN, buffer, 1024)) > 0) {
+        for(int i = 0; i < bytesRead; i++) {
+            if( buffer[i] == 'a' ||
+                buffer[i] == 'e' ||
+                buffer[i] == 'i' ||
+                buffer[i] == 'o' ||
+                buffer[i] == 'u') continue;
+                
+            _syswrite(1, &buffer[i], 1);
+        }
+    }
+
+    return 0;
+}
+
+int cmd_not_implemented() {
+    printf("Comando no implementado\n");
+    return 0;
+}

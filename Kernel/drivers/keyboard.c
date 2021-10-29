@@ -33,7 +33,7 @@ static const Key KeyTable[] = {
 
 //Tabla de conversión de Key a ascii
 static const uint8_t AsciiTable[] = {
-    0,0,0,0,0,
+    0,-1,0,0,0,
     0,0,0,0,
     0,0,0,0,
     0,0,0,0,
@@ -62,7 +62,7 @@ static const uint8_t AsciiTable[] = {
 
 //Tabla de conversión de Shift+Key a ascii
 static const uint8_t ShiftAsciiTable[] = {
-    0,0,0,0,0,
+    0,-1,0,0,0,
     0,0,0,0,
     0,0,0,0,
     0,0,0,0,

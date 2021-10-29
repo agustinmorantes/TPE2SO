@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <currentTime.h>
 
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2 
+
 typedef int PID;
 typedef int semID;
 

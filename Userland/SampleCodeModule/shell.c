@@ -34,9 +34,10 @@ static uint8_t split(char* input, char* buf[], uint8_t maxCount) {
 	return word+1;
 }
 
-void readinput(char* outputBuf) {
+int readinput(char* outputBuf) {
 	printf("> ");
 	int len = _sysread(0, outputBuf, MAX_CMD_LEN);
+	if(len <= 0) return -1;
 	outputBuf[len-1] = 0;
 }
 
@@ -52,7 +53,11 @@ int shellProcessWrapper(int argc, char** argv) {
 void runShell() {
     while(1) {
 		char input[MAX_CMD_LEN];
-		readinput(input);
+
+		if(readinput(input) < 0){
+			printf("\n");
+			continue;
+		}
 
 		if(strcmp(input, "") == 0)
 			continue;
