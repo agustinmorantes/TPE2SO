@@ -183,10 +183,12 @@ int64_t unblockProcess(PID pid) {
 
         if (process->pcb.pid == blockedList.first->pcb.pid) {
             blockedList.first = blockedList.first->next;
-            blockedList.first->prev = NULL;
+            if (blockedList.first != NULL)
+                blockedList.first->prev = NULL;
         } else {
             process->prev->next = process->next;
-            process->next->prev = process->prev;
+            if (process->next != NULL)
+                process->next->prev = process->prev;
         } 
 
         if (readyList.count == 0) {
