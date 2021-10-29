@@ -27,6 +27,11 @@ static void * haltRsp;
 
 static uint64_t halt = 0;
 
+void forkfd(int fd[]) {
+    for (int i = 0; i < MAX_FD; i++)
+        fd[i] = readyList.current->pcb.fd[i];
+}
+
 int schedulerAddProcess(PCB pcb) {
     if(pcb.pid == 0) {
         haltRsp = pcb.rsp;

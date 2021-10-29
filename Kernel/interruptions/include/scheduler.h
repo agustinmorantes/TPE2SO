@@ -18,3 +18,4 @@ int fdLocalToGlobal(int fd);
 void addFd(uint32_t fd);
 void removeFd(uint32_t fd);
 void listProcesses();
+void forkfd(int fd[]);
