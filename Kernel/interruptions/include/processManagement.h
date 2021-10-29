@@ -4,6 +4,7 @@
 
 typedef int PID;
 
+#define PROC_MEM (8*1024)
 typedef enum State {
     READY = 1,
     BLOCKED,

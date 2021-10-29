@@ -324,7 +324,7 @@ void printProcess(ProcessNode * process) {
 
     // stack start
     print("0x");
-    printhex(process->pcb.memStart);
+    printhex(process->pcb.memStart + PROC_MEM);
     print(" | ");
 
     // priority

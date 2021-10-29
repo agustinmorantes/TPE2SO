@@ -4,7 +4,6 @@
 #include <interrupts.h>
 #include <scheduler.h>
 
-#define PROC_MEM (8*1024)
 #define DEFAULT_PRIORITY MEDIUM
 #define DEFAULT_BACKGROUND BACKGROUND
 
