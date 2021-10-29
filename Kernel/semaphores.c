@@ -32,6 +32,23 @@ static semaphore * searchSemaphore(semID searchID) {
     return NULL;    
 }
 
+static void removeSemaphore(semID id) {
+    semaphore * prev = semList;
+    if (prev->id == id) {
+        semList = NULL;
+        free(prev);
+    }
+    semaphore * iterator = semList->next;
+    while (iterator != NULL) {
+        if (iterator->id = id) {
+            prev->next = iterator->next;
+            return;
+        }
+        prev = prev->next;
+        iterator = iterator->next;
+    }
+}
+
 static void addToProcessQueue(processQueue queue, PID pid, int isActiveQueue) {
     if (isActiveQueue) { // En la lista de activos veo que no haya repetidos, en la de bloqueados no es necesario
         processNode * it = queue.first;
@@ -73,10 +90,10 @@ static void removeFromActiveQueue(processQueue queue, PID pid) {
             it->next = it->next->next;
             if (queue.last == aux)
                 queue.last = it;
+            free(aux);
         }
         it = it->next;
     }
-    
 }
 
 static void popBlockedQueue(processQueue queue, PID pid) {
@@ -161,4 +178,13 @@ int semPost(semID id) {
     return 0;
 }
 
-int semClose(semID id);
+int semClose(semID id) {
+    semaphore * sem = searchSemaphore(id);
+    if (sem == NULL)
+        return -1;
+    removeFromActiveQueue(sem->activeQueue, getpid());
+    if (sem->activeQueue.first == NULL) {
+        free(sem);
+    }
+    return 1;
+}
