@@ -3,20 +3,19 @@
 typedef struct processNode {
     PID pid;
     struct processNode * next;
-    struct processNode * prev;
 } processNode;
 
-// typedef struct processQueue {
-//     processNode * first;
-//     processNode * last;
-// } processQueue;
+typedef struct processQueue {
+    processNode * first;
+    processNode * last;
+} processQueue;
 
 typedef struct semaphore {
     semID id;
     uint64_t value;
     spinlock lock;
-    processNode * processQueue;
-    processNode * blockedQueue;    
+    processQueue activeQueue;
+    processQueue blockedQueue;    
     struct semaphore * next;
 } semaphore;
 
@@ -25,8 +24,7 @@ static semaphore * semList = NULL;
 
 static semaphore * searchSemaphore(semID searchID) {
     semaphore * iterator = semList;
-    while (iterator != NULL)
-    {
+    while (iterator != NULL) {
         if (iterator->id == searchID)
             return iterator;
         iterator = iterator->next;
@@ -34,29 +32,61 @@ static semaphore * searchSemaphore(semID searchID) {
     return NULL;    
 }
 
-static void addToProcessQueue(processNode * processQueue, PID pid) {
-    processNode * prev = processQueue;
-    if (prev == NULL)
-    {
-        prev = alloc(sizeof(processNode));
-        prev->pid = pid;
-        prev->next = NULL;
-        prev->prev = NULL;
+static void addToProcessQueue(processQueue queue, PID pid, int isActiveQueue) {
+    if (isActiveQueue) { // En la lista de activos veo que no haya repetidos, en la de bloqueados no es necesario
+        processNode * it = queue.first;
+        while (it != NULL) {
+            // No agrego dos veces al mismo
+            if (it->pid == pid)
+                return;
+            it = it->next;
+        }
+    }
+    
+    processNode * toAdd = alloc(sizeof(processNode));
+    if (toAdd == NULL)
+        return; //TODO
+    toAdd->pid = pid;
+    toAdd->next = NULL;
+    if (queue.first == NULL)
+        queue.first = toAdd;
+    else
+        queue.last->next = toAdd;
+
+    queue.last = toAdd;
+}
+
+static void removeFromActiveQueue(processQueue queue, PID pid) {
+    processNode * it = queue.first;
+    if (it == NULL) 
+        return;
+    if (it == queue.last) {
+        queue.first = NULL;
+        queue.last = NULL;
+        free(it);
         return;
     }
-    processNode * it = processQueue->next;
-    while (it != NULL)
-    {
-        if (it->pid == pid)
-            return;
-        prev = it;
+
+    while (it->next != NULL) {
+        if (it->next->pid == pid) {
+            processNode * aux = it->next;
+            it->next = it->next->next;
+            if (queue.last == aux)
+                queue.last = it;
+        }
         it = it->next;
     }
-    it = alloc(sizeof(processNode));
-    it->next = NULL;
-    it->prev = prev;
-    it->pid = pid;
-    prev->next = it;
+    
+}
+
+static void popBlockedQueue(processQueue queue, PID pid) {
+    if (queue.first == NULL)
+        return;
+    processNode * toRemove = queue.first;
+    queue.first = queue.first->next;
+    if (queue.first == NULL)
+        queue.last = NULL;
+    free(toRemove);
 }
 
 static void addSemaphore(semaphore * toAdd) {
@@ -70,36 +100,65 @@ static void addSemaphore(semaphore * toAdd) {
     it->next = toAdd;
 }
 
-void semOpen(semID id, uint64_t value) {
+int semOpen(semID id, uint64_t value) {
     semaphore * toAdd = searchSemaphore(id);
     if (toAdd != NULL) {
-        addToProcessQueue(toAdd->processQueue, getpid());
-        return;
+        addToProcessQueue(toAdd->activeQueue, getpid(), 1);
+        return 0;
     }
     toAdd = alloc(sizeof(semaphore));
     if (toAdd == NULL)
-        return; // TODO NULL-Check
+        return -1; // TODO NULL-Check
     
     toAdd->value = value;
-    toAdd->blockedQueue = NULL;
-    toAdd->processQueue = NULL;
+    toAdd->blockedQueue.first = NULL;
+    toAdd->blockedQueue.last = NULL;
+    toAdd->activeQueue.first = NULL;
+    toAdd->activeQueue.last = NULL;
     initLock(&toAdd->lock);
     addSemaphore(toAdd);
+    return 1;
 }
 
-void semWait(semID id);
+static void wakeup(processQueue queue) {
+    PID pid = getpid();
+    popBlockedQueue(queue, pid);
+    unblockProcess(pid);
+}
 
-void semPost(semID id) {
+static void sleep(processQueue queue) {
+    PID pid = getpid();
+    addToProcessQueue(queue, pid, 0);
+    blockProcess(pid);
+}
+
+int semWait(semID id) {
     semaphore * sem = searchSemaphore(id);
     if (sem == NULL)
-        return; // TODO NULL-Check
-    
-    if (sem->blockedQueue == NULL)
-    {
-        acquire(&sem->lock);
-        sem->value += 1;
-        release(&sem->lock);
-        return;
+        return -1;
+
+    acquire(&(sem->lock));
+    if (sem->value > 0)
+        sem->value -= 1;
+    else {
+        release(&(sem->lock));
+        sleep(sem->blockedQueue);
+        acquire(&(sem->lock));
+        sem->value -= 1;
     }
-    // Despertar a alguien
+    return 0;
 }
+
+int semPost(semID id) {
+    semaphore * sem = searchSemaphore(id);
+    if (sem == NULL)
+        return -1;
+    
+    acquire(&(sem->lock));
+    sem->value += 1;
+    wakeup(sem->blockedQueue);
+    release(&(sem->lock));
+    return 0;
+}
+
+int semClose(semID id);

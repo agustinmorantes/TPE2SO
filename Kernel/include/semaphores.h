@@ -8,8 +8,8 @@
 
 typedef int semID;
 
-void semOpen(semID id, uint64_t value);
+int semOpen(semID id, uint64_t value);
 
-void semWait(semID id);
+int semWait(semID id);
 
-void semPost(semID id);
+int semPost(semID id);
