@@ -42,15 +42,23 @@ int readinput(char* outputBuf) {
 }
 
 int shellProcessWrapper(int argc, char** argv) {
+	Background bg = (int)argv[argc+1];
+	CmdHandler cmd = (CmdHandler)argv[argc];
+
 	PID pid = _sysgetpid();
-    printf("[SHELL] Proceso Background con PID %d\n", pid);
-    int retcode = ((CmdHandler)argv[argc])(argc-1, argv);
+    
+	if(bg) printf("[SHELL] Proceso con PID %d\n", pid);
+    
+	int retcode = cmd(argc-bg, argv);
 	_sysmapstdfds(pid, 0, 1);
-    printf("[SHELL] Process exit code: %d", retcode);
+    //printf("[SHELL] Process exit code: %d", retcode);
+	_sempost(SHELL_SEM);
     _sysexit();
 }
 
 void runShell() {
+	_semopen(SHELL_SEM, 0);
+
     while(1) {
 		char input[MAX_CMD_LEN];
 
@@ -73,10 +81,17 @@ void runShell() {
 
 		if(cmd.isBackground) {
 			argv[argc] = (char*)cmd.handler;
+			argv[argc+1] = (char*)BACKGROUND;
 			PID pid = _syscreateprocess(&shellProcessWrapper, argc, argv);
 			_syschgpriority(pid, 1);
 		} else {
-			cmd.handler(argc, argv);
+			argv[argc] = (char*)cmd.handler;
+			argv[argc+1] = (char*)FOREGROUND;
+			PID pid = _syscreateprocess(&shellProcessWrapper, argc, argv);
+			_syssetbackground(pid, FOREGROUND);
+			_semwait(SHELL_SEM);
 		}
     }
+
+	_semclose(SHELL_SEM);
 }
