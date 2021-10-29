@@ -184,6 +184,7 @@ int semClose(semID id) {
         return -1;
     removeFromActiveQueue(sem->activeQueue, getpid());
     if (sem->activeQueue.first == NULL) {
+        removeSemaphore(sem->id);
         free(sem);
     }
     return 1;
