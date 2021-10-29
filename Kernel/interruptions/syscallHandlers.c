@@ -5,6 +5,7 @@
 #include <scheduler.h>
 #include <fd.h>
 #include <pipe.h>
+#include <semaphores.h>
 
 static uint8_t rawMode = 0;
 
@@ -172,5 +173,21 @@ int64_t openFifoSyscall(uint64_t id, fdType type) {
 }
 
 int mapStdFdsSyscall(PID pid, int stdin, int stdout) {
-    mapStdFds(pid, stdin, stdout);
+    return mapStdFds(pid, stdin, stdout);
+}
+
+int semOpenSyscall(semID id, uint64_t value) {
+    return semOpen(id, value);
+}
+
+int semWaitSyscall(semID id) {
+    return semWait(id);
+}
+
+int semPostSyscall(semID id) {
+    return semPost(id);
+}
+
+int semCloseSyscall(semID id) {
+    return semClose(id);
 }
