@@ -192,3 +192,11 @@ int mapStdFdsSyscall(PID pid, int stdin, int stdout) {
 int64_t rmFifoSyscall(uint64_t id) {
     return rmFifo(id);
 }
+
+void listPipesSyscall() {
+    listPipes();
+}
+
+void listProcessSyscall() {
+    listProcesses();
+}

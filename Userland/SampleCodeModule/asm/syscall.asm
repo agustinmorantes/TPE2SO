@@ -19,6 +19,8 @@ GLOBAL _sysmkfifo
 GLOBAL _sysopenfifo
 GLOBAL _sysmapstdfds
 GLOBAL _sysrmfifo
+GLOBAL _syslistpipes
+GLOBAL _syslistprocesses
 
 section .text
 
@@ -75,3 +77,7 @@ _sysmapstdfds:
     systemCall 19
 _sysrmfifo:
     systemCall 20
+_syslistpipes:
+    systemCall 21
+_syslistprocesses:
+    systemCall 22

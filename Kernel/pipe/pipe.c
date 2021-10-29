@@ -4,6 +4,7 @@
 #include <pipe.h>
 #include <memory_manager.h>
 #include <scheduler.h>
+#include <console.h>
 
 #define PIPE_BUF 4096
 #define MAX_FIFO 64
@@ -18,6 +19,10 @@ struct Pipe {
     int writepid;
     // sem writequeue
     // sem readqueue
+
+    // only for printing
+    int readfd;
+    int writefd;
 };
 
 typedef struct fifo {
@@ -28,13 +33,16 @@ typedef struct fifo {
 
 static FIFO fifoTable[MAX_FIFO];
 
+// only for printing
+static PIPE pipeTable[MAX_FD];
+
 int64_t mkfifo(uint64_t id) {
     if (id == 0) return -1; // 0 not a valid id
     int64_t k = -1;
     for (int64_t i = 0; i < MAX_FIFO; i++) {
         if (fifoTable[i].id == id) // ya existe
             return -1;
-        if (fifoTable[i].id == 0) // encontre lugar
+        if (fifoTable[i].id == 0 && k == -1) // encontre lugar
             k = i;
     }
 
@@ -106,6 +114,16 @@ int64_t openPipe(uint64_t fd[2]) {
     pipe->writeOpen = 1;
     pipe->readOpen = 1;
     
+    // only for printing
+    pipe->readfd = fd[0];
+    pipe->writefd = fd[1];
+    for (size_t i = 0; i < MAX_FD; i++) {
+        if (pipeTable[i] == NULL) {
+            pipeTable[i] = pipe;
+            break;
+        }
+    }
+    
     return 0;
 }
 
@@ -115,8 +133,16 @@ void closePipe(PIPE pipe, fdType type) {
     else if (type == WRITE)
         pipe->writeOpen = 0;
     
-    if (!pipe->readOpen && !pipe->writeOpen)    
+    if (!pipe->readOpen && !pipe->writeOpen) {
+        // only for printing
+        for (size_t i = 0; i < MAX_FD; i++) {
+            if (pipeTable[i] == pipe) {
+                pipeTable[i] = NULL;
+                break;
+            }
+        }
         free(pipe);
+    }
 }
 
 int64_t readPipe(PIPE pipe, char* buf, uint64_t count) {
@@ -181,4 +207,49 @@ int64_t writePipe(PIPE pipe, const char* buf, uint64_t count) {
     // sempost writequeue
 
     return count;
+}
+
+void listPipes() {
+    println("Lista de pipes del sistema:");
+    println("readfd | writefd | bytesToRead | readPid | writePid | writeQueue | readQueue");
+    for (size_t i = 0; i < MAX_FD; i++) {
+        if (pipeTable[i] != NULL) {
+            // readfd
+            if (pipeTable[i]->readOpen)
+                printnum(pipeTable[i]->readfd);
+            else
+                print("-");
+            print(" | ");
+
+            // writefd
+            if (pipeTable[i]->writeOpen)
+                printnum(pipeTable[i]->writefd);
+            else
+                print("-");
+            print(" | ");
+
+            // bytesToRead
+            printnum(pipeTable[i]->writeIdx - pipeTable[i]->readIdx);
+            print(" | ");
+
+            // readPid
+            if (pipeTable[i]->readpid)
+                printnum(pipeTable[i]->readpid);
+            else
+                print("-");
+            print(" | ");
+
+            // writePid
+            if (pipeTable[i]->writepid)
+                printnum(pipeTable[i]->writepid);
+            else
+                print("-");
+            print(" | ");
+
+            // print writequeue pids
+            // print readqueue pids
+
+            newLine();
+        }
+    }
 }

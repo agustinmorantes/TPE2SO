@@ -25,3 +25,5 @@ int64_t openFifoSyscall(uint64_t id, fdType type);
 int setBackgroundSyscall(PID pid, Background background);
 int mapStdFdsSyscall(PID pid, int stdin, int stdout);
 int64_t rmFifoSyscall(uint64_t id);
+void listPipesSyscall();
+void listProcessSyscall();

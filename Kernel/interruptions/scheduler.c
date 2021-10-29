@@ -279,3 +279,76 @@ void yield() {
     readyList.current->priorityCounter = 0;
     _int20();
 }
+// 77
+void listProcesses() {
+    println("Lista de procesos del sistema");
+    println("pid | name | state | rsp | stackStart | priority | fg/bg");
+    ProcessNode * iterator = readyList.current;
+    for (int i = 0; i < readyList.count ; i++, iterator = iterator->next) {
+        printProcess(iterator);
+    }
+    iterator = blockedList.first;
+    while (iterator != NULL) {
+        printProcess(iterator);
+        iterator = iterator->next;
+    }
+}
+
+void printProcess(ProcessNode * process) {
+    // pid
+    printnum(process->pcb.pid);
+    print(" | ");
+
+    // name
+    print(process->pcb.argv[0]);
+    print(" | ");
+
+    // state
+    switch (process->pcb.state) {
+        case READY:
+            print("ready");
+            break;
+        case TERMINATED:
+            print("terminated");
+            break;
+        case BLOCKED:
+            print("blocked");
+            break;
+    }
+    print(" | ");
+
+    // rsp
+    print("0x");
+    printhex(process->pcb.rsp);
+    print(" | ");
+
+    // stack start
+    print("0x");
+    printhex(process->pcb.memStart);
+    print(" | ");
+
+    // priority
+    switch (process->pcb.priority) {
+        case LOW:
+            print("low");
+            break;
+        case MEDIUM:
+            print("medium");
+            break;
+        case HIGH:
+            print("high");
+            break;
+    }
+    print(" | ");
+
+    // fg/bg
+    switch (process->pcb.background) {
+        case BACKGROUND:
+            print("background");
+            break;
+        case FOREGROUND:
+            print("foreground");
+            break;
+    }
+    newLine();
+}

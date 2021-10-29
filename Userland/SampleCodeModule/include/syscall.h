@@ -44,3 +44,5 @@ int64_t _sysmkfifo(uint64_t id);
 int64_t _sysopenfifo(uint64_t id, fdType type);
 int _sysmapstdfds(PID pid, int stdin, int stdout);
 int64_t _sysrmfifo(uint64_t id);
+void _syslistpipes();
+void _syslistprocesses();
