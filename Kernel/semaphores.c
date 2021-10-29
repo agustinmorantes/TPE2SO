@@ -126,7 +126,7 @@ int semOpen(semID id, uint64_t value) {
     toAdd = alloc(sizeof(semaphore));
     if (toAdd == NULL)
         return -1; // TODO NULL-Check
-    
+    toAdd->id = id;
     toAdd->value = value;
     toAdd->blockedQueue.first = NULL;
     toAdd->blockedQueue.last = NULL;

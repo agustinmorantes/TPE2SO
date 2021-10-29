@@ -9,9 +9,6 @@
 typedef int semID;
 
 int semOpen(semID id, uint64_t value);
-
 int semWait(semID id);
-
 int semPost(semID id);
-
 int semClose(semID id);
