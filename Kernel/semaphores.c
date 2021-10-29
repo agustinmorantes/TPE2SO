@@ -49,9 +49,9 @@ static void removeSemaphore(semID id) {
     }
 }
 
-static void addToProcessQueue(processQueue queue, PID pid, int isActiveQueue) {
+static void addToProcessQueue(processQueue * queue, PID pid, int isActiveQueue) {
     if (isActiveQueue) { // En la lista de activos veo que no haya repetidos, en la de bloqueados no es necesario
-        processNode * it = queue.first;
+        processNode * it = queue->first;
         while (it != NULL) {
             // No agrego dos veces al mismo
             if (it->pid == pid)
@@ -65,21 +65,21 @@ static void addToProcessQueue(processQueue queue, PID pid, int isActiveQueue) {
         return; //TODO
     toAdd->pid = pid;
     toAdd->next = NULL;
-    if (queue.first == NULL)
-        queue.first = toAdd;
+    if (queue->first == NULL)
+        queue->first = toAdd;
     else
-        queue.last->next = toAdd;
+        queue->last->next = toAdd;
 
-    queue.last = toAdd;
+    queue->last = toAdd;
 }
 
-static void removeFromActiveQueue(processQueue queue, PID pid) {
-    processNode * it = queue.first;
+static void removeFromActiveQueue(processQueue * queue, PID pid) {
+    processNode * it = queue->first;
     if (it == NULL) 
         return;
-    if (it == queue.last) {
-        queue.first = NULL;
-        queue.last = NULL;
+    if (it == queue->last) {
+        queue->first = NULL;
+        queue->last = NULL;
         free(it);
         return;
     }
@@ -88,22 +88,24 @@ static void removeFromActiveQueue(processQueue queue, PID pid) {
         if (it->next->pid == pid) {
             processNode * aux = it->next;
             it->next = it->next->next;
-            if (queue.last == aux)
-                queue.last = it;
+            if (queue->last == aux)
+                queue->last = it;
             free(aux);
         }
         it = it->next;
     }
 }
 
-static void popBlockedQueue(processQueue queue, PID pid) {
-    if (queue.first == NULL)
+static PID popBlockedQueue(processQueue * queue) {
+    if (queue->first == NULL)
         return;
-    processNode * toRemove = queue.first;
-    queue.first = queue.first->next;
-    if (queue.first == NULL)
-        queue.last = NULL;
+    processNode * toRemove = queue->first;
+    PID pid = toRemove->pid;
+    queue->first = queue->first->next;
+    if (queue->first == NULL)
+        queue->last = NULL;
     free(toRemove);
+    return pid;
 }
 
 static void addSemaphore(semaphore * toAdd) {
@@ -120,7 +122,7 @@ static void addSemaphore(semaphore * toAdd) {
 int semOpen(semID id, uint64_t value) {
     semaphore * toAdd = searchSemaphore(id);
     if (toAdd != NULL) {
-        addToProcessQueue(toAdd->activeQueue, getpid(), 1);
+        addToProcessQueue(&(toAdd->activeQueue), getpid(), 1);
         return 0;
     }
     toAdd = alloc(sizeof(semaphore));
@@ -132,18 +134,18 @@ int semOpen(semID id, uint64_t value) {
     toAdd->blockedQueue.last = NULL;
     toAdd->activeQueue.first = NULL;
     toAdd->activeQueue.last = NULL;
+    addToProcessQueue(&(toAdd->activeQueue), getpid(), 1);
     initLock(&toAdd->lock);
     addSemaphore(toAdd);
     return 1;
 }
 
-static void wakeup(processQueue queue) {
-    PID pid = getpid();
-    popBlockedQueue(queue, pid);
+static void wakeup(processQueue * queue) {
+    PID pid = popBlockedQueue(queue);
     unblockProcess(pid);
 }
 
-static void sleep(processQueue queue) {
+static void sleep(processQueue * queue) {
     PID pid = getpid();
     addToProcessQueue(queue, pid, 0);
     blockProcess(pid);
@@ -159,7 +161,7 @@ int semWait(semID id) {
         sem->value -= 1;
     else {
         release(&(sem->lock));
-        sleep(sem->blockedQueue);
+        sleep(&(sem->blockedQueue));
         acquire(&(sem->lock));
         sem->value -= 1;
     }
@@ -173,7 +175,7 @@ int semPost(semID id) {
     
     acquire(&(sem->lock));
     sem->value += 1;
-    wakeup(sem->blockedQueue);
+    wakeup(&(sem->blockedQueue));
     release(&(sem->lock));
     return 0;
 }
@@ -182,7 +184,7 @@ int semClose(semID id) {
     semaphore * sem = searchSemaphore(id);
     if (sem == NULL)
         return -1;
-    removeFromActiveQueue(sem->activeQueue, getpid());
+    removeFromActiveQueue(&(sem->activeQueue), getpid());
     if (sem->activeQueue.first == NULL) {
         removeSemaphore(sem->id);
         free(sem);

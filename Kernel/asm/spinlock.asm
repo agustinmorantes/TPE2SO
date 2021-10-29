@@ -9,15 +9,15 @@ section .text
 ;     ret
 
 acquire: 
-    mov rax, 1
-    xchg rax, [rdi]
+    mov al, 1
+    xchg al, [rdi]
 
-    test rax, rax
+    test al, al
     jnz acquire
 
     ret
 
 release:
-    mov rax, 0
-    xchg rax, [rdi]
+    mov al, 0
+    xchg al, [rdi]
     ret

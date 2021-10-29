@@ -1,5 +1,5 @@
 #include <spinlock.h>
 
 void initLock(spinlock * lock) {
-    *lock = 1;
+    *lock = 0;
 }
