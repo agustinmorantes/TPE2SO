@@ -151,11 +151,52 @@ static void sleep(processQueue * queue) {
     blockProcess(pid);
 }
 
+static int verifyPID(processQueue * activeQueue, PID pid) {
+    processNode * iterator = activeQueue->first;
+    while (iterator != NULL) {
+        if (iterator->pid == pid) {
+            return 1;
+        }
+        iterator = iterator->next;
+    }
+    return 0;
+}
+
+static void printStats(semaphore * sem) {
+    printnum(sem->id);
+    print(" | ");
+    // if (sem->blockedQueue.first != NULL)
+    //     print("BLOCKED");
+    // else 
+    //     print("NOT BLOCKED");
+    printnum(sem->value);
+    print(" | ");
+    processNode * it = sem->blockedQueue.first;
+    while (it != NULL) {
+        printnum(it->pid);
+        print(" ");
+        it = it->next;
+    }
+    newLine();
+}
+
+void semPrintAll() {
+    println("SEMAPHORE ID | STATUS | BLOCKED PROCESSES");
+    semaphore * it = semList;
+    while (it != NULL) {
+        printStats(it);
+        it = it->next;
+    }
+}
+
 int semWait(semID id) {
     semaphore * sem = searchSemaphore(id);
     if (sem == NULL)
         return -1;
-
+    
+    if (!verifyPID(&(sem->activeQueue), getpid()))
+        return -2;
+    
     acquire(&(sem->lock));
     if (sem->value > 0)
         sem->value -= 1;
@@ -165,6 +206,7 @@ int semWait(semID id) {
         acquire(&(sem->lock));
         sem->value -= 1;
     }
+    release(&(sem->lock));
     return 0;
 }
 
@@ -172,6 +214,9 @@ int semPost(semID id) {
     semaphore * sem = searchSemaphore(id);
     if (sem == NULL)
         return -1;
+
+    if (!verifyPID(&(sem->activeQueue), getpid()))
+        return -2;
     
     acquire(&(sem->lock));
     sem->value += 1;
@@ -184,6 +229,10 @@ int semClose(semID id) {
     semaphore * sem = searchSemaphore(id);
     if (sem == NULL)
         return -1;
+
+    if (!verifyPID(&(sem->activeQueue), getpid()))
+        return -2;
+    
     removeFromActiveQueue(&(sem->activeQueue), getpid());
     if (sem->activeQueue.first == NULL) {
         removeSemaphore(sem->id);
