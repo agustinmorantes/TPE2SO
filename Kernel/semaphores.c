@@ -73,13 +73,14 @@ static void addToProcessQueue(processQueue * queue, PID pid, int isActiveQueue) 
     queue->last = toAdd;
 }
 
-static void removeFromActiveQueue(processQueue * queue, PID pid) {
+static void removeFromQueue(processQueue * queue, PID pid) {
     processNode * it = queue->first;
     if (it == NULL) 
         return;
-    if (it == queue->last) {
-        queue->first = NULL;
-        queue->last = NULL;
+    if (it->pid == pid) {
+        queue->first = it->next;
+        if (it->next == NULL)
+            queue->last = NULL;
         free(it);
         return;
     }
@@ -91,6 +92,7 @@ static void removeFromActiveQueue(processQueue * queue, PID pid) {
             if (queue->last == aux)
                 queue->last = it;
             free(aux);
+            return;
         }
         it = it->next;
     }
@@ -233,7 +235,7 @@ int semClose(semID id) {
     if (!verifyPID(&(sem->activeQueue), getpid()))
         return -2;
     
-    removeFromActiveQueue(&(sem->activeQueue), getpid());
+    removeFromQueue(&(sem->activeQueue), getpid());
     if (sem->activeQueue.first == NULL) {
         removeSemaphore(sem->id);
         free(sem);
