@@ -231,6 +231,9 @@ void removeTerminated(ProcessNode * terminated) {
         } 
     }
 
+    for (size_t i = 3; i < MAX_FD; i++)
+        closefd(terminated->pcb.fd[i]);
+    
     free(terminated->pcb.memStart);
     free(terminated);
 }
@@ -250,6 +253,7 @@ int64_t terminateProcess(PID pid) {
     if (process) {
         process->pcb.state = TERMINATED;
         removeTerminated(process);
+        return 0;
     }
     
     return -1;
