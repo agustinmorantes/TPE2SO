@@ -196,6 +196,7 @@ int64_t rmFifoSyscall(uint64_t id) {
 
 void listPipesSyscall() {
     listPipes();
+}
 
 int semOpenSyscall(semID id, uint64_t value) {
     return semOpen(id, value);
