@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <rtc.h>
 #include <pipe.h>
+#include <semaphores.h>
 #include <processManagement.h>
 
 int64_t write(uint64_t fd, const char* buf, uint64_t count);
@@ -27,3 +28,7 @@ int mapStdFdsSyscall(PID pid, int stdin, int stdout);
 int64_t rmFifoSyscall(uint64_t id);
 void listPipesSyscall();
 void listProcessSyscall();
+int semOpenSyscall(semID id, uint64_t value);
+int semWaitSyscall(semID id);
+int semPostSyscall(semID id);
+int semCloseSyscall(semID id);

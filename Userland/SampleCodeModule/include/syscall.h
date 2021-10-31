@@ -4,6 +4,7 @@
 #include <currentTime.h>
 
 typedef int PID;
+typedef int semID;
 
 typedef enum Priority {
     LOW = 1,
@@ -46,3 +47,7 @@ int _sysmapstdfds(PID pid, int stdin, int stdout);
 int64_t _sysrmfifo(uint64_t id);
 void _syslistpipes();
 void _syslistprocesses();
+int _semopen(semID id, uint64_t value);
+int _semwait(semID id);
+int _sempost(semID id);
+int _semclose(semID id);

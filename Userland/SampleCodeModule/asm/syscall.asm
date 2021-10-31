@@ -21,6 +21,10 @@ GLOBAL _sysmapstdfds
 GLOBAL _sysrmfifo
 GLOBAL _syslistpipes
 GLOBAL _syslistprocesses
+GLOBAL _semopen
+GLOBAL _semwait
+GLOBAL _sempost
+GLOBAL _semclose
 
 section .text
 
@@ -81,3 +85,11 @@ _syslistpipes:
     systemCall 21
 _syslistprocesses:
     systemCall 22
+_semopen:
+    systemCall 23
+_semwait:
+    systemCall 24
+_sempost:
+    systemCall 25
+_semclose:
+    systemCall 26
