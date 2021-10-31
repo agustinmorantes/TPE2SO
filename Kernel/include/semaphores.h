@@ -14,3 +14,4 @@ int semWait(semID id);
 int semPost(semID id);
 int semClose(semID id);
 void semPrintAll();
+void semPrintPIDs(semID id);

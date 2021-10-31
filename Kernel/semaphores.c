@@ -167,10 +167,6 @@ static int verifyPID(processQueue * activeQueue, PID pid) {
 static void printStats(semaphore * sem) {
     printnum(sem->id);
     print(" | ");
-    // if (sem->blockedQueue.first != NULL)
-    //     print("BLOCKED");
-    // else 
-    //     print("NOT BLOCKED");
     printnum(sem->value);
     print(" | ");
     processNode * it = sem->blockedQueue.first;
@@ -182,8 +178,24 @@ static void printStats(semaphore * sem) {
     newLine();
 }
 
+void semPrintPIDs(semID id) {
+    semaphore * iterator = semList;
+    while (iterator != NULL) {
+        if (iterator->id == id) {
+            processNode * it = iterator->blockedQueue.first;
+            while (it != NULL) {
+                printnum(it->pid);
+                print(" ");
+                it = it->next;
+            }
+            return;
+        }
+        iterator = iterator->next;
+    }
+}
+
 void semPrintAll() {
-    println("SEMAPHORE ID | STATUS | BLOCKED PROCESSES");
+    println("SEMAPHORE ID | VALUE | BLOCKED PROCESSES");
     semaphore * it = semList;
     while (it != NULL) {
         printStats(it);
