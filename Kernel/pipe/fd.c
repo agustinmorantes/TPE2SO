@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define MAX_FD 255
-
 typedef struct fd {
     uint64_t ref;
     fdType type;
@@ -38,19 +36,19 @@ int64_t closefd(uint64_t id) {
 }
 
 void fddup(uint64_t id) {
-    if (id > MAX_FD || fdTable[id].ref == 0)
+    if (id >= MAX_FD || fdTable[id].ref == 0)
         return;
     fdTable[id].ref++;
 }
 
 int64_t readfd(uint64_t fd, char* buf, uint64_t count) {
-    if (fd > MAX_FD || fdTable[fd].type != READ) 
+    if (fd >= MAX_FD || fdTable[fd].type != READ) 
         return -1;
     return readPipe(fdTable[fd].pipe, buf, count);    
 }
 
 int64_t writefd(uint64_t fd, const char* buf, uint64_t count) {
-    if (fd > MAX_FD || fdTable[fd].type != WRITE) 
+    if (fd >= MAX_FD || fdTable[fd].type != WRITE) 
         return -1;
     return writePipe(fdTable[fd].pipe, buf, count);    
 }

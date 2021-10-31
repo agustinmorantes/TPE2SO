@@ -18,6 +18,9 @@ GLOBAL _sysclose
 GLOBAL _sysmkfifo
 GLOBAL _sysopenfifo
 GLOBAL _sysmapstdfds
+GLOBAL _sysrmfifo
+GLOBAL _syslistpipes
+GLOBAL _syslistprocesses
 GLOBAL _semopen
 GLOBAL _semwait
 GLOBAL _sempost
@@ -76,11 +79,17 @@ _sysopenfifo:
     systemCall 18
 _sysmapstdfds:
     systemCall 19
-_semopen:
+_sysrmfifo:
     systemCall 20
-_semwait:
+_syslistpipes:
     systemCall 21
-_sempost:
+_syslistprocesses:
     systemCall 22
-_semclose:
+_semopen:
     systemCall 23
+_semwait:
+    systemCall 24
+_sempost:
+    systemCall 25
+_semclose:
+    systemCall 26

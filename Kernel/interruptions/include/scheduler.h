@@ -15,3 +15,7 @@ void yield(void);
 void _int20(void);
 int mapStdFds(PID pid, int stdin, int stdout);
 int fdLocalToGlobal(int fd);
+void addFd(uint32_t fd);
+void removeFd(uint32_t fd);
+void listProcesses();
+void forkfd(int fd[]);

@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <pipe.h>
 
+#define MAX_FD 255
+
 int64_t initfd(fdType type, PIPE pipe);
 int64_t closefd(uint64_t id);
 void fddup(uint64_t id);

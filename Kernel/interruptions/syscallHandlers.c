@@ -11,6 +11,7 @@ static uint8_t rawMode = 0;
 
 int64_t write(uint64_t fd, const char* buf, uint64_t count) {
     fd = fdLocalToGlobal(fd);
+    if (fd < 0) return -1;
 
     if(fd == 1) {
         for(int i = 0; i < count; i++) {
@@ -31,6 +32,8 @@ int64_t write(uint64_t fd, const char* buf, uint64_t count) {
 
 int64_t read(uint64_t fd, char* buf, uint64_t count) {
     fd = fdLocalToGlobal(fd);
+    if (fd < 0) return -1;
+
     if(fd == 0) {
         if(getBackground()) {
             blockProcess(getpid());
@@ -153,15 +156,24 @@ void yieldSyscall(void) {
 }
 
 int setBackgroundSyscall(PID pid, Background background) {
-    setBackground(pid, background);
+    return setBackground(pid, background);
 }
 
 int64_t pipeSyscall(uint64_t fd[2]) {
-    return openPipe(fd);
+    int result = openPipe(fd);
+    if (result >= 0) {
+        addFd(fd[0]);
+        addFd(fd[1]);
+    }
+    return result;
 }
 
 int64_t close(uint64_t fd) {
-    return closefd(fd);
+    fd = fdLocalToGlobal(fd);
+    int result = closefd(fd);
+    if (result >= 0)
+        removeFd(fd);
+    return result;
 }
 
 int64_t mkfifoSyscall(uint64_t id) {
@@ -169,12 +181,21 @@ int64_t mkfifoSyscall(uint64_t id) {
 }
 
 int64_t openFifoSyscall(uint64_t id, fdType type) {
-    return openFifo(id, type);
+    int64_t fd = openFifo(id, type);
+    if (fd >= 0) addFd(fd);
+    return fd;
 }
 
 int mapStdFdsSyscall(PID pid, int stdin, int stdout) {
     return mapStdFds(pid, stdin, stdout);
 }
+
+int64_t rmFifoSyscall(uint64_t id) {
+    return rmFifo(id);
+}
+
+void listPipesSyscall() {
+    listPipes();
 
 int semOpenSyscall(semID id, uint64_t value) {
     return semOpen(id, value);
@@ -190,4 +211,8 @@ int semPostSyscall(semID id) {
 
 int semCloseSyscall(semID id) {
     return semClose(id);
+}
+
+void listProcessSyscall() {
+    listProcesses();
 }

@@ -2,6 +2,7 @@
 #include <console.h>
 #include <keyboard.h>
 #include <interrupts.h>
+#include <scheduler.h>
 
 static void blueScreenOfDeath(const Registers * regs, char * msg);
 
@@ -9,21 +10,20 @@ void exceptionDispatcher(int exception, const Registers * regs) {
 	switch (exception)
 	{
 	case ZERO_EXCEPTION_ID:
-		blueScreenOfDeath(regs, "A division by zero was attempted");
+		printc("A division by zero was attempted", LightGray, Red);
+		terminateProcess(getpid());
 		break;
 	case INVALID_OPCODE_ID:
-		blueScreenOfDeath(regs, "An invalid instruction was read");
+		printc("An invalid instruction was read", LightGray, Red);
+		terminateProcess(getpid());
 		break;
 	default:
 		// Sabemos que no debería ser posible llegar a este punto, pues nosotros cargamos la tabla IDT como queremos. Sin embargo, dejamos esto por conveniencia para cuando se quiera seguir trabajando.
 		blueScreenOfDeath(regs, "Unknown Error");
+		terminateProcess(getpid());
 		break;
 	}
 }
-
-static void *const sampleCodeModuleAddress = (void *)0x400000;
-typedef int (*EntryPoint)();
-
 
 // Definimos una única función, pues la única diferencia entre ambas excepciones manejadas por nuestra Kernel es un mensaje al usuario.
 // Si se quisiera algo particular para las excepciones en específico, se puede serparar en dos.
@@ -97,9 +97,4 @@ static void blueScreenOfDeath(const Registers * regs, char * msg) {
 	while (readKeyPoll() != 28); //28 es el scancode de la tecla ENTER. Se lee por polling
 	clearTerminal();
 	_sti(); //Vuelvo a activar interrpuciones
-
-	// Sabemos que esta implementación no es la mejor, pero nuestra Kernel es todo un proceso fluido. Sin manejar soporte de distintos procesos, no hay otra forma para continuar de una excepción
-	// más que reiniciar la terminal en la que se lanzó la excepción, y continuar el programa. Sabemos que esto deja datos en el stack de antes que se lance la excepción, y que llamamos a una función
-	// que nunca retorna, pero es lo único que podemos hacer sin manejar procesos.
-	((EntryPoint)sampleCodeModuleAddress)();		
 }
