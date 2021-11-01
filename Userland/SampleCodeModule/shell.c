@@ -45,6 +45,8 @@ int readinput(char* outputBuf) {
 }
 
 int shellProcessWrapper(int argc, char** argv) {
+	_semopen(FOREGROUND_SEM, 0);
+	_semopen(START_PROC_SEM, 0);
 	_semwait(START_PROC_SEM);
 	
 	Background bg = (int)argv[argc+1];
@@ -60,6 +62,9 @@ int shellProcessWrapper(int argc, char** argv) {
 	int retcode = cmd(argc-bg, argv);
 	_sysmapstdfds(pid, 0, 1);
 	if(!bg) _sempost(FOREGROUND_SEM);
+
+	_semclose(FOREGROUND_SEM);
+	_semclose(START_PROC_SEM);
     _sysexit();
 }
 

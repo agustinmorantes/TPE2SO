@@ -7,10 +7,15 @@
 #include <str.h>
 #include <cpufeatures.h>
 
-int cmd_lscmd() {
+int cmd_help() {
     printf("Lista de comandos:\n");
     for(int i = 0; i < CMD_COUNT; i++) {
-        printf("%s\n",commands[i].name);
+        if(i%6 == 0) printf("\n");
+        
+        if(i == CMD_COUNT-1) {
+            printf("%s\n",commands[i].name);
+        } else printf("%s | ",commands[i].name);
+
     }
     return 0;
 }
@@ -110,12 +115,12 @@ int cmd_suma() {
     return 0;
 }
 
-int cmd_background_test() {
+int cmd_loop() {
     Time t = getCurrentTime();
+    PID pid = _sysgetpid();
     while(1) {
         if(t.seconds != (t = getCurrentTime()).seconds && t.seconds % 3 == 0) {
-            printCurrentTime();
-            printf("\n");
+            printf("[PID:%d] Hola soy loop\n", pid);
         }
     }
 }
@@ -247,6 +252,21 @@ int cmd_filter() {
         }
     }
 
+    return 0;
+}
+
+int cmd_ps() {
+    _syslistprocesses();
+    return 0;
+}
+
+int cmd_pipe() {
+    _syslistpipes();
+    return 0;
+}
+
+int cmd_sem() {
+    _syslistsem();
     return 0;
 }
 
