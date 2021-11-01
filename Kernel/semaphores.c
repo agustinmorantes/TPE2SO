@@ -117,7 +117,7 @@ static void addSemaphore(semaphore * toAdd) {
         return;
     }
     while (it->next != NULL)
-        it->next = it->next->next;
+        it = it->next;
     it->next = toAdd;
 }
 
@@ -208,9 +208,6 @@ int semWait(semID id) {
     if (sem == NULL)
         return -1;
     
-    if (!verifyPID(&(sem->activeQueue), getpid()))
-        return -2;
-    
     acquire(&(sem->lock));
     if (sem->value > 0)
         sem->value -= 1;
@@ -228,9 +225,6 @@ int semPost(semID id) {
     semaphore * sem = searchSemaphore(id);
     if (sem == NULL)
         return -1;
-
-    if (!verifyPID(&(sem->activeQueue), getpid()))
-        return -2;
     
     acquire(&(sem->lock));
     sem->value += 1;
@@ -252,5 +246,15 @@ int semClose(semID id) {
         removeSemaphore(sem->id);
         free(sem);
     }
+    return 1;
+}
+
+// only for kernel
+int deleteSemaphore(semID id) {
+    semaphore * sem = searchSemaphore(id);
+    if (sem == NULL)
+        return -1;
+    removeSemaphore(sem->id);
+    free(sem);
     return 1;
 }

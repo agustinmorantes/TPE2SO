@@ -200,19 +200,30 @@ void listPipesSyscall() {
     listPipes();
 }
 
+// userland tiene un offset para los semaforos
+#define SEM_OFFSET 10000
+
 int semOpenSyscall(semID id, uint64_t value) {
+    id += SEM_OFFSET;
+    if (id + SEM_OFFSET < id) return -1;
     return semOpen(id, value);
 }
 
 int semWaitSyscall(semID id) {
+    id += SEM_OFFSET;
+    if (id + SEM_OFFSET < id) return -1;
     return semWait(id);
 }
 
 int semPostSyscall(semID id) {
+    id += SEM_OFFSET;
+    if (id + SEM_OFFSET < id) return -1;
     return semPost(id);
 }
 
 int semCloseSyscall(semID id) {
+    id += SEM_OFFSET;
+    if (id + SEM_OFFSET < id) return -1;
     return semClose(id);
 }
 
