@@ -70,7 +70,9 @@ int main()
 	printnum(pid);
 	newLine();
 
-	pid = processCreate(sampleCodeModuleAddress, 1, argv);
+	char* argvshell[] = {"shell"};
+
+	pid = processCreate(sampleCodeModuleAddress, 1, argvshell);
 	changePriority(pid, HIGH);
 	setBackground(pid, FOREGROUND);
 	print("First process created with PID ");

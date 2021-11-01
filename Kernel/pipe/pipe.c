@@ -113,6 +113,8 @@ int64_t openPipe(uint64_t fd[2]) {
 
     pipe->writeOpen = 1;
     pipe->readOpen = 1;
+    pipe->readIdx = 0;
+    pipe->writeIdx = 0;
     
     // only for printing
     pipe->readfd = fd[0];
@@ -130,8 +132,11 @@ int64_t openPipe(uint64_t fd[2]) {
 void closePipe(PIPE pipe, fdType type) {
     if (type == READ)
         pipe->readOpen = 0;
-    else if (type == WRITE)
+    else if (type == WRITE) {
         pipe->writeOpen = 0;
+        pipe->buf[pipe->writeIdx++ % PIPE_BUF] = -1;
+    }
+        
     
     if (!pipe->readOpen && !pipe->writeOpen) {
         // only for printing
@@ -149,9 +154,6 @@ int64_t readPipe(PIPE pipe, char* buf, uint64_t count) {
     if (!pipe->readOpen)
         return -1;
 
-    if (!pipe->writeOpen)
-        return 0;
-
     // semwait readqueue
 
     pipe->readpid = getpid();
@@ -168,6 +170,8 @@ int64_t readPipe(PIPE pipe, char* buf, uint64_t count) {
     int i;
     for(i = 0; i < count; i++) {
         if(pipe->readIdx == pipe->writeIdx)
+            break;
+        if(pipe->buf[pipe->readIdx % PIPE_BUF] == -1)
             break;
         buf[i] = pipe->buf[pipe->readIdx++ % PIPE_BUF];
     }
