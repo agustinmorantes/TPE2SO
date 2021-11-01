@@ -50,13 +50,15 @@ int shellProcessWrapper(int argc, char** argv) {
 	Background bg = (int)argv[argc+1];
 	CmdHandler cmd = (CmdHandler)argv[argc];
 
+	int pipeFdToClose = (int)argv[argc+2];
+	if(pipeFdToClose >= 0) {
+		_sysclose(pipeFdToClose);
+	}
+	
 	PID pid = _sysgetpid();
-    
-	if(bg) printf("[SHELL] Proceso con PID %d\n", pid);
     
 	int retcode = cmd(argc-bg, argv);
 	_sysmapstdfds(pid, 0, 1);
-    //printf("[SHELL] Process exit code: %d", retcode);
 	if(!bg) _sempost(FOREGROUND_SEM);
     _sysexit();
 }
@@ -109,22 +111,27 @@ void runShell() {
 				continue;
 			}
 
-			int pipe[2];
+			uint64_t pipe[2];
 			if(_syspipe(pipe) < 0) {
 				printf("[SHELL] Error: pipe failed\n");
 				continue;
 			}
 
 			argv0[argc0] = (char*)cmd0.handler;
+			argv0[argc0+2] = (char*)pipe[0];
 			argv1[argc1] = (char*)cmd1.handler;
-			argv1[argc1+1] = (char*)BACKGROUND;
+			
+			argv1[argc1+2] = (char*)pipe[1];
 			PID pid0 = _syscreateprocess(&shellProcessWrapper, argc0, argv0);
 			PID pid1 = _syscreateprocess(&shellProcessWrapper, argc1, argv1);
 			_sysmapstdfds(pid0, STDIN, pipe[1]);
 			_sysmapstdfds(pid1, pipe[0], STDOUT);
+			_sysclose(pipe[0]);
+			_sysclose(pipe[1]);
 
 			if(cmd1.isBackground) {
 				argv0[argc0+1] = (char*)BACKGROUND;
+				argv1[argc1+1] = (char*)BACKGROUND;
 				_syschgpriority(pid0, 1);
 				_syschgpriority(pid1, 1);
 				_sempost(START_PROC_SEM);
@@ -132,11 +139,14 @@ void runShell() {
 			}
 			else {
 				argv0[argc0+1] = (char*)FOREGROUND;
+				argv1[argc1+1] = (char*)FOREGROUND;
 				_syssetbackground(pid0, FOREGROUND);
 				_sempost(START_PROC_SEM);
 				_sempost(START_PROC_SEM);
 				_semwait(FOREGROUND_SEM);
+				_semwait(FOREGROUND_SEM);
 			}
+			continue;
 		}
 		
 		Command cmd = parseCommand(totalArgc,argv0);
@@ -146,6 +156,7 @@ void runShell() {
 		}
 
 		argv0[totalArgc] = (char*)cmd.handler;
+		argv0[totalArgc+2] = (char*)-1;
 		if(cmd.isBackground) {
 			argv0[totalArgc+1] = (char*)BACKGROUND;
 			PID pid = _syscreateprocess(&shellProcessWrapper, totalArgc, argv0);

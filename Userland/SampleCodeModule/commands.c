@@ -214,17 +214,19 @@ int cmd_cat() {
 int cmd_wc() {
     char buffer[1024];
     int bytesRead = 0;
-    int words = 1;
     int lines = 1;
+    int wasLastCharNewline = 0;
     while((bytesRead = _sysread(STDIN, buffer, 1024)) > 0) {
         for(int i = 0; i < bytesRead; i++) {
-            if(buffer[i] == '\n') 
+            wasLastCharNewline = 0;
+            if(buffer[i] == '\n') {
                 lines++;
-
-            if(buffer[i] == ' ' || buffer[i] == '\n') 
-                words++;
+                wasLastCharNewline = 1;
+            }
         }
     }
+
+    if(wasLastCharNewline) lines--;
 
     printf("\nLines: %d\n", lines);
     return 0;
