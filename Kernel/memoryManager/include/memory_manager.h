@@ -7,6 +7,8 @@ void * alloc(unsigned long size);
 
 void free(void * memptr);
 
-size_t getFreeBytesRemaining();
-size_t getTotalBytes();
-size_t getUsedMemory();
+#ifdef BUDDY
+void setupBuddy();
+#endif
+
+void print_mem_state();

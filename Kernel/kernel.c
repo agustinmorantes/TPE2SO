@@ -10,6 +10,7 @@
 #include <processManagement.h>
 #include <time.h>
 #include <scheduler.h>
+#include <memory_manager.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -49,6 +50,10 @@ void *initializeKernelBinary()
 	
 	initVideo();
 
+	#ifdef BUDDY
+	setupBuddy();
+	#endif
+
 	return getStackBase();
 }
 
@@ -62,6 +67,12 @@ int main()
 	printcln("[Kernel Main]", Black, Yellow);
 
 	_cli();
+
+	#ifdef BUDDY
+	printcln("[MEM] Using Buddy allocator", Black, Yellow);
+	#else
+	printcln("[MEM] Using default allocator", Black, Yellow);
+	#endif
 
 	char* argv[] = {0};
 
