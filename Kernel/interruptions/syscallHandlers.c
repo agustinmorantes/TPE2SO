@@ -127,7 +127,7 @@ void printmem(const void* ptr) {
     }
 }
 
-void exit() {
+void exitSyscall() {
     terminateProcess(getpid());
 }
 
@@ -216,4 +216,8 @@ int semCloseSyscall(semID id) {
 
 void listProcessSyscall() {
     listProcesses();
+}
+
+void listSemaphoreSyscall() {
+    semPrintAll();
 }

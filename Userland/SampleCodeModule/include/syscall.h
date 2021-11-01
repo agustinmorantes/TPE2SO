@@ -51,3 +51,4 @@ int _semopen(semID id, uint64_t value);
 int _semwait(semID id);
 int _sempost(semID id);
 int _semclose(semID id);
+void _syslistsem();

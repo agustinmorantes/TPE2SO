@@ -25,6 +25,7 @@ GLOBAL _semopen
 GLOBAL _semwait
 GLOBAL _sempost
 GLOBAL _semclose
+GLOBAL _syslistsem
 
 section .text
 
@@ -93,3 +94,5 @@ _sempost:
     systemCall 25
 _semclose:
     systemCall 26
+_syslistsem:
+    systemCall 27

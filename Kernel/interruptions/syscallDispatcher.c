@@ -25,7 +25,7 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 			return 0;
 			break;
 		case 6: 
-			exit();
+			exitSyscall();
 			return 0;
 			break;
 		case 7:
@@ -64,10 +64,10 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 			break;
 		case 18: 
 			return openFifoSyscall((uint64_t) arg0, (fdType) arg1);
-      break;
+      		break;
 		case 19:
 			return mapStdFdsSyscall((PID) arg0, (int) arg1, (int) arg2);
-      break;
+      		break;
 		case 20: 
 			return rmFifoSyscall((uint64_t) arg0);
 			break;
@@ -81,16 +81,20 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 			break;
 		case 23:
 			return semOpenSyscall((semID) arg0, (uint64_t) arg1);
-	  	break;
+	  		break;
 		case 24:
 			return semWaitSyscall((semID) arg0);
-	  	break;
+	  		break;
 		case 25:
 			return semPostSyscall((semID) arg0);
-	  	break;
+	  		break;
 		case 26:
 			return semCloseSyscall((semID) arg0);
-	  	break;
+	  		break;
+		case 27:
+			listSemaphoreSyscall();
+			return;
+			break;
 	}
 	return -1;
 }
