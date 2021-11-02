@@ -1,3 +1,5 @@
+#ifndef BUDDY
+
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -162,3 +164,5 @@ size_t getTotalBytes() {
 size_t getUsedMemory() {
     return MAX_SIZE - freeBytesRemaining;
 }
+
+#endif

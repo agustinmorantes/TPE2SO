@@ -10,6 +10,8 @@ INCLUDES=$(addprefix -I ,$(INCLUDE_DIRS))
 SOURCES=$(wildcard *.c) $(wildcard interruptions/*.c) $(wildcard drivers/*.c) $(wildcard memoryManager/*.c) $(wildcard pipe/*.c)
 SOURCES_ASM=$(wildcard asm/*.asm) $(wildcard interruptions/asm/*.asm) $(wildcard drivers/asm/*.asm)
 
+GCCDEFS=
+
 # Carpeta y archivos objeto 
 OBJECTS_DIR=./obj
 OBJECTS=$(SOURCES:%.c=$(OBJECTS_DIR)/%.o)
@@ -25,6 +27,10 @@ ALL_OBJECTS= $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM)
 # Regla "make all"
 all: $(KERNEL)
 
+# Regla "make buddy"
+buddy: GCCDEFS=-DBUDDY
+buddy: $(KERNEL)
+
 # Linkedición
 $(KERNEL): $(STATICLIBS) $(ALL_OBJECTS)
 	$(LD) $(LDFLAGS) -T kernel.ld -o $@ $^
@@ -34,7 +40,7 @@ $(KERNEL): $(STATICLIBS) $(ALL_OBJECTS)
 # Compilación archivos C (primero creo el output path si no existe)
 $(OBJECTS_DIR)/%.o: %.c
 	mkdir -p $(@D) 
-	$(GCC) $(GCCFLAGS) $(INCLUDES) -c $< -o $@
+	$(GCC) $(GCCFLAGS) $(GCCDEFS) $(INCLUDES) -c $< -o $@
 
 # Ensamblado archivos ASM (primero creo el output path si no existe)
 $(OBJECTS_DIR)/%.o : %.asm
@@ -48,4 +54,4 @@ $(LOADEROBJECT):
 clean:
 	rm -rf $(ALL_OBJECTS) *.bin *.elf $(OBJECTS_DIR)
 
-.PHONY: all clean
+.PHONY: all clean buddy
