@@ -119,7 +119,9 @@ int cmd_loop() {
     Time t = getCurrentTime();
     PID pid = _sysgetpid();
     while(1) {
-        if(t.seconds != (t = getCurrentTime()).seconds && t.seconds % 3 == 0) {
+        Time newT = getCurrentTime();
+        if((t.seconds != newT.seconds) && (newT.seconds % 3 == 0)) {
+            t = newT;
             printf("[PID:%d] Hola soy loop\n", pid);
         }
         _sysyield();
@@ -165,7 +167,7 @@ int cmd_nice(int argc, const char** argv) {
     int pid = -1;
     Priority priority = -1;
     strToIntBase(argv[1], strlen(argv[1]), 10, &pid, 1);
-    strToIntBase(argv[2], strlen(argv[2]), 10, &priority, 1);
+    strToIntBase(argv[2], strlen(argv[2]), 10, (int*)&priority, 1);
 
     if (pid == -1) {
         printf("USE: nice [PID] [PRIORITY(1-3)]\n");

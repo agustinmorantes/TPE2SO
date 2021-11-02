@@ -313,20 +313,6 @@ void yield() {
     _int20();
 }
 
-void listProcesses() {
-    println("Lista de procesos del sistema");
-    println("pid | name | state | rsp | stackStart | priority | fg/bg");
-    ProcessNode * iterator = readyList.current;
-    for (int i = 0; i < readyList.count ; i++, iterator = iterator->next) {
-        printProcess(iterator);
-    }
-    iterator = blockedList.first;
-    while (iterator != NULL) {
-        printProcess(iterator);
-        iterator = iterator->next;
-    }
-}
-
 void printProcess(ProcessNode * process) {
     // pid
     printnum(process->pcb.pid);
@@ -352,12 +338,12 @@ void printProcess(ProcessNode * process) {
 
     // rsp
     print("0x");
-    printhex(process->pcb.rsp);
+    printhex((uint64_t)(process->pcb.rsp));
     print(" | ");
 
     // stack start
     print("0x");
-    printhex(process->pcb.memStart + PROC_MEM);
+    printhex((uint64_t)(process->pcb.memStart) + PROC_MEM);
     print(" | ");
 
     // priority
@@ -384,4 +370,18 @@ void printProcess(ProcessNode * process) {
             break;
     }
     newLine();
+}
+
+void listProcesses() {
+    println("Lista de procesos del sistema");
+    println("pid | name | state | rsp | stackStart | priority | fg/bg");
+    ProcessNode * iterator = readyList.current;
+    for (int i = 0; i < readyList.count ; i++, iterator = iterator->next) {
+        printProcess(iterator);
+    }
+    iterator = blockedList.first;
+    while (iterator != NULL) {
+        printProcess(iterator);
+        iterator = iterator->next;
+    }
 }

@@ -46,6 +46,7 @@ int readinput(char* outputBuf) {
 	int len = _sysread(0, outputBuf, MAX_CMD_LEN);
 	if(len <= 0) return -1;
 	outputBuf[len-1] = 0;
+	return 0;
 }
 
 int shellProcessWrapper(int argc, char** argv) {
@@ -54,10 +55,10 @@ int shellProcessWrapper(int argc, char** argv) {
 	_semwait(START_PROC_SEM);
 	
 	Background bg;
-	strToIntBase(argv[argc-WRAPPER_ARGS+1], strlen(argv[argc-WRAPPER_ARGS+1]), 10, &bg, 1);
+	strToIntBase(argv[argc-WRAPPER_ARGS+1], strlen(argv[argc-WRAPPER_ARGS+1]), 10, (int*)&bg, 1);
 
 	uint64_t cmdInt;
-	strToIntBase(argv[argc-WRAPPER_ARGS], strlen(argv[argc-WRAPPER_ARGS]), 10, &cmdInt, 1);
+	strToIntBase(argv[argc-WRAPPER_ARGS], strlen(argv[argc-WRAPPER_ARGS]), 10, (int*)&cmdInt, 1);
 	
 	CmdHandler cmd = (CmdHandler)cmdInt;
 
@@ -70,13 +71,14 @@ int shellProcessWrapper(int argc, char** argv) {
 	
 	PID pid = _sysgetpid();
     
-	int retcode = cmd(argc-WRAPPER_ARGS, argv);
+	int retcode = cmd(argc-WRAPPER_ARGS, (const char**)argv);
 	_sysmapstdfds(pid, 0, 1);
 	if(!bg) _sempost(FOREGROUND_SEM);
 
 	_semclose(FOREGROUND_SEM);
 	_semclose(START_PROC_SEM);
     _sysexit();
+	return retcode;
 }
 
 int checkPipeCommand(int* argc0, char** argv0, char** argv1) {
@@ -203,8 +205,8 @@ void runShell() {
 
 		if(pipeCommand) {
 			int argc1 = totalArgc-argc0-1;
-			Command cmd0 = parseCommand(argc0, argv0);
-			Command cmd1 = parseCommand(argc1, argv1);
+			Command cmd0 = parseCommand(argc0, (const char**)argv0);
+			Command cmd1 = parseCommand(argc1, (const char**)argv1);
 
 			if(cmd0.handler == NULL || cmd1.handler == NULL) {
 				printf("[SHELL] Error: command not found\n");
@@ -215,7 +217,7 @@ void runShell() {
 			continue;
 		}
 		
-		Command cmd = parseCommand(totalArgc,argv0);
+		Command cmd = parseCommand(totalArgc,(const char**)argv0);
 		if(cmd.handler == NULL) {
 			printf("Comando desconocido: %s\n", argv0[0]);
 			continue;

@@ -61,8 +61,8 @@ static Command commands[] = {
 	{"suma", cmd_suma,0},
 	{"fdmaptest",cmd_fdMap_test,0},
 	{"greet",cmd_greet,0},
-	{"test_mm",test_mm,0},
-	{"test_prio",test_prio,0},
-	{"test_processes",test_processes,0},
-	{"test_sync",test_sync,0}
+	{"test_mm",(CmdHandler)test_mm,0},
+	{"test_prio",(CmdHandler)test_prio,0},
+	{"test_processes",(CmdHandler)test_processes,0},
+	{"test_sync",(CmdHandler)test_sync,0}
 };

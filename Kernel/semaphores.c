@@ -40,7 +40,7 @@ static void removeSemaphore(semID id) {
     }
     semaphore * iterator = semList->next;
     while (iterator != NULL) {
-        if (iterator->id = id) {
+        if ((iterator->id = id)) {
             prev->next = iterator->next;
             return;
         }
