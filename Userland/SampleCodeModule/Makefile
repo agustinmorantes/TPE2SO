@@ -3,10 +3,10 @@ include ../Makefile.inc
 MODULE=0000-sampleCodeModule.bin
 OBJECTS_DIR=./obj
 
-INCLUDE_DIRS=include
+INCLUDE_DIRS=include tests/include
 INCLUDES=$(addprefix -I ,$(INCLUDE_DIRS))
 
-SOURCES=$(wildcard [^_]*.c)
+SOURCES=$(wildcard [^_]*.c) $(wildcard tests/*.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS_ASM=$(SOURCES_ASM:%.asm=$(OBJECTS_DIR)/%.o)
 
