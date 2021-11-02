@@ -56,3 +56,5 @@ int _semwait(semID id);
 int _sempost(semID id);
 int _semclose(semID id);
 void _syslistsem();
+void* _sysalloc(unsigned int size);
+void _sysfree(void* mem);
