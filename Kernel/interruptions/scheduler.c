@@ -266,14 +266,19 @@ int64_t terminateProcess(PID pid) {
 
 static int firstTime = 1;
 
-void * scheduler(void * rsp) {
+void * scheduler(void * rsp) {    
     if (haltRsp == 0) // not initialized
         return rsp;
 
     if (halt)
         haltRsp = rsp;
-    else if (!firstTime)
+    else if (!firstTime) {
+        if (rsp < readyList.current->pcb.memStart) {
+            printcln("PISASTE MEMORIA",Black,Red);
+            haltcpu();
+        }
         readyList.current->pcb.rsp = rsp;
+    }
     halt = 0;
     firstTime = 0;
     
@@ -281,7 +286,7 @@ void * scheduler(void * rsp) {
         halt = 1;
         return haltRsp;
     }
-
+    
     if (readyList.current->pcb.state == TERMINATED) 
         removeTerminated(readyList.current);
     else if (readyList.current->pcb.state == BLOCKED)
