@@ -5,8 +5,8 @@
 //TO BE INCLUDED
 static void endless_loop()
 {
-  while (1)
-    ;
+  while (1) // added yield so that it runs faster
+    _sysyield();
 }
 
 static uint32_t my_create_process(void *func, char *name)
@@ -30,7 +30,7 @@ static uint32_t my_unblock(uint32_t pid)
   return _sysunblock(pid);
 }
 
-#define MAX_PROCESSES 10 //Should be around 80% of the the processes handled by the kernel
+#define MAX_PROCESSES 3000 //Should be around 80% of the the processes handled by the kernel
 
 enum State
 {
@@ -46,13 +46,17 @@ typedef struct P_rq
   enum State state;
 } p_rq;
 
+// se saca afuera para no ocupar stack
+static p_rq p_rqs[MAX_PROCESSES];
+
 void test_processes()
 {
-  p_rq p_rqs[MAX_PROCESSES];
-  uint8_t rq;
-  uint8_t alive = 0;
-  uint8_t action;
+  // se modifico porque uint8_t no alcanzaba para la cantidad de procesos
+  uint64_t rq;
+  uint64_t alive = 0;
+  uint64_t action;
 
+  printf("Creating %d processes..\n",MAX_PROCESSES);
   while (1)
   {
 
@@ -60,7 +64,6 @@ void test_processes()
     for (rq = 0; rq < MAX_PROCESSES; rq++)
     {
       p_rqs[rq].pid = my_create_process(&endless_loop, "endless_loop"); // TODO: Port this call as required
-
       if (p_rqs[rq].pid == -1)
       {                                     // TODO: Port this as required
         printf("Error creating process\n"); // TODO: Port this as required
@@ -122,7 +125,7 @@ void test_processes()
           p_rqs[rq].state = RUNNING;
         }
 
-      printf("OK\n");
     }
+  printf("OK\n");
   }
 }

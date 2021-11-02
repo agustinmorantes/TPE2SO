@@ -42,7 +42,10 @@ int schedulerAddProcess(PCB pcb) {
     }
 
     ProcessNode * newReady = alloc(sizeof(ProcessNode));
-    if (newReady == NULL) return -1;
+    if (newReady == NULL) {
+        printcln("NO MORE MEMORY TO CREATE PROCESS",Black,Red);
+        return -1;
+    }
     newReady->pcb = pcb;
     newReady->priorityCounter = pcb.priority;
 
@@ -224,7 +227,7 @@ void removeTerminated(ProcessNode * terminated) {
         } else 
             readyList.current = NULL;
         readyList.count--;
-    } else {
+    } else if (terminated->pcb.state == BLOCKED) {
         if (terminated->pcb.pid == blockedList.first->pcb.pid) {
             blockedList.first = blockedList.first->next;
             if (blockedList.first != NULL)
@@ -234,6 +237,10 @@ void removeTerminated(ProcessNode * terminated) {
             if (terminated->next != NULL)
                 terminated->next->prev = terminated->prev;
         } 
+    } else {
+        terminated->prev->next = terminated->next;
+        terminated->next->prev = terminated->prev;
+        readyList.count--;
     }
 
     for (size_t i = 3; i < MAX_FD; i++)
@@ -252,11 +259,11 @@ int64_t terminateProcess(PID pid) {
     ProcessNode * process = searchReadyNode(pid);
     if (process) {
         process->pcb.state = TERMINATED;
+        removeTerminated(process);
         return 0;
     }
     process = searchBlockedNode(pid);
     if (process) {
-        process->pcb.state = TERMINATED;
         removeTerminated(process);
         return 0;
     }
@@ -286,7 +293,7 @@ void * scheduler(void * rsp) {
         halt = 1;
         return haltRsp;
     }
-    
+
     if (readyList.current->pcb.state == TERMINATED) 
         removeTerminated(readyList.current);
     else if (readyList.current->pcb.state == BLOCKED)
@@ -296,9 +303,6 @@ void * scheduler(void * rsp) {
         readyList.current = readyList.current->next;
     }
     readyList.current->priorityCounter--;
-
-    while (readyList.current->pcb.state == TERMINATED)
-        removeTerminated(readyList.current);
 
     if (readyList.count == 0) {
         halt = 1;

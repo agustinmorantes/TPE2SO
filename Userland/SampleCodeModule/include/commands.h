@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <tests.h>
+#include <syscall.h>
 
 #define CMD_COUNT 28
 
@@ -41,7 +42,7 @@ static Command commands[] = {
 	{"clear",cmd_clear,0},
 	{"time",cmd_time,0},
 	{"loop",cmd_loop,0},
-	{"mem", cmd_not_implemented,0},
+	{"mem", _sysmem,0},
 	{"ps", cmd_ps, 0},
 	{"kill", cmd_kill,0},
 	{"nice", cmd_nice,0},

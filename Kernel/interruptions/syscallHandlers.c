@@ -231,3 +231,7 @@ void* allocSyscall(unsigned long size) {
 void freeSyscall(void* mem) {
     free(mem);
 }
+
+void listmemSyscall() {
+    print_mem_state();
+}

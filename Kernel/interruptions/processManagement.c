@@ -60,8 +60,10 @@ static PCB tempPCB;
 
 PID processCreate(void* program, unsigned int argc, char** argv) {
     void* memStart = alloc(PROC_MEM);
-    if (memStart == NULL) 
+    if (memStart == NULL) {
+        printcln("NO MORE MEMORY TO CREATE PROCESS",Black,Red);
         return -1;
+    }
     
     void* memEnd = (char*)memStart + PROC_MEM - 1;
 
