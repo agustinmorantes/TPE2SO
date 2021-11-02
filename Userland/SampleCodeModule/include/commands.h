@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#define CMD_COUNT 25
+#define CMD_COUNT 24
 
 typedef int (*CmdHandler)(int argc, const char* argv[]);
 
