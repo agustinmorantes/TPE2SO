@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <str.h>
 #include <currentTime.h>
+#include <io.h>
 
 #define THINKING 0
 #define HUNGRY 1
@@ -19,29 +20,12 @@ static uint8_t philoVector[MAX_PHILO_COUNT];
 static int philoPID[MAX_PHILO_COUNT];
 static int philoCount;
 
-void philosophers(unsigned int argc, const char** argv) {
-    int idx;
-    if (argc > 1) {
-        if (strToIntBase(argv[1], strlen(argv[1]), 10, &idx, 1) <= 0)
-            return;
-    }
-
-    while (1) {
-        //Thinking
-        for (int i = 0; i < 10000; i++);
-        tryToEat(idx);
-        //Eating
-        for (int i = 0; i < 10000; i++); 
-        stopEating(idx);
-    }
-}
-
 void tryToEat(int idx) {
     philoVector[idx] = HUNGRY;
     while (philoVector[idx] == HUNGRY) {
         _semwait(MUTEX_ID);
         if (philoVector[idx] == HUNGRY && philoVector[LEFT(idx)] != EATING && philoVector[RIGHT(idx)] != EATING) {
-            philoVector[idx] == EATING;
+            philoVector[idx] = EATING;
             _sempost(SEMAPHORE_MIN_ID + idx);
         }
         _sempost(MUTEX_ID);
@@ -57,6 +41,23 @@ void stopEating(int idx) {
     if (philoVector[SEMAPHORE_MIN_ID + RIGHT(idx)] == HUNGRY)
         _sempost(RIGHT(idx));
     _sempost(MUTEX_ID);
+}
+
+void philosophers(unsigned int argc, const char** argv) {
+    int idx;
+    if (argc > 1) {
+        if (strToIntBase(argv[1], strlen(argv[1]), 10, &idx, 1) <= 0)
+            return;
+    }
+
+    while (1) {
+        //Thinking
+        for (int i = 0; i < 10000; i++);
+        tryToEat(idx);
+        //Eating
+        for (int i = 0; i < 10000; i++); 
+        stopEating(idx);
+    }
 }
 
 void philosopherPrinter() {
@@ -105,13 +106,17 @@ void philosopherManager() {
         char * printerArgs[] = {"phprinter",0};
         printerpid = _syscreateprocess(&philosopherPrinter, 1, printerArgs);
 
-        char buf[1];
+        char buf[2];
         while (_sysread(0,buf,1)) {
             switch (buf[0]) {
             case 'a':
+                if (philoCount == MAX_PHILO_COUNT)
+                    continue;
                 modified = 1;
                 break;
             case 'r':
+                if (philoCount == 2)
+                    continue;
                 modified = -1;
                 break;
             case 't':
@@ -124,8 +129,8 @@ void philosopherManager() {
         }
         
         for (int i = 0; i < philoCount; i++) {
-            _semclose(SEMAPHORE_MIN_ID + i);
             _syskill(philoPID[i]);
+            _semclose(SEMAPHORE_MIN_ID + i);
         }
         _syskill(printerpid);
         _semclose(MUTEX_ID);

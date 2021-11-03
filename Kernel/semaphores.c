@@ -33,21 +33,24 @@ static semaphore * searchSemaphore(semID searchID) {
 }
 
 static void removeSemaphore(semID id) {
-    semaphore * prev = semList;
-    if (prev->id == id) {
-        semList = semList->next;
-        free(prev);
+    semaphore * it = semList;
+    if (it == NULL) 
+        return;
+    
+    if (it->id == id) {
+        semList = it->next;
+        free(it);
         return;
     }
-    semaphore * iterator = semList->next;
-    while (iterator != NULL) {
-        if (iterator->id == id) {
-            prev->next = iterator->next;
-            free(iterator);
+
+    while (it->next != NULL) {
+        if (it->next->id == id) {
+            semaphore * aux = it->next;
+            it->next = it->next->next;
+            free(aux);
             return;
         }
-        prev = prev->next;
-        iterator = iterator->next;
+        it = it->next;
     }
 }
 
@@ -138,6 +141,7 @@ int semOpen(semID id, uint64_t value) {
     toAdd->blockedQueue.last = NULL;
     toAdd->activeQueue.first = NULL;
     toAdd->activeQueue.last = NULL;
+    toAdd->next = NULL;
     addToProcessQueue(&(toAdd->activeQueue), getpid(), 1);
     initLock(&toAdd->lock);
     addSemaphore(toAdd);
