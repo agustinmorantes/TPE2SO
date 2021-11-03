@@ -258,8 +258,11 @@ void listPipes() {
                 print("-");
             print(" | ");
 
-            // print writequeue pids
             // print readqueue pids
+            semPrintPIDs(pipeTable[i]->readqueue);
+            print(" | ");
+            // print writequeue pids
+            semPrintPIDs(pipeTable[i]->writequeue);
 
             newLine();
         }
