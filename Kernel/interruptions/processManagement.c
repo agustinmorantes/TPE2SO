@@ -84,7 +84,7 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     for(int i = 0; i < argc; i++) {
         newProcArgv[i] = staticArgs[i];
     }    
-
+  
     void* rsp = (uint64_t*)newProcArgv-1;
     rsp = (uint64_t)rsp % 8 == 0 ? rsp : (uint64_t)rsp - (uint64_t)rsp % 8;
 
@@ -106,6 +106,7 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     tempPCB.argv = newProcArgv;
     tempPCB.priority = DEFAULT_PRIORITY;
     tempPCB.background = DEFAULT_BACKGROUND;
+
     if (pid == 1) { // si es el primer proceso le abro los std fds
         tempPCB.fd[0] = 0;
         tempPCB.fd[1] = 1;

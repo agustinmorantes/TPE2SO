@@ -178,5 +178,4 @@ void print_mem_state() {
    printhex(freeBytesRemaining);
    print(" Bytes\n");
 }
-
 #endif
