@@ -3,7 +3,7 @@
 #include <tests.h>
 #include <syscall.h>
 
-#define CMD_COUNT 28
+#define CMD_COUNT 29
 
 typedef int (*CmdHandler)(int argc, const char* argv[]);
 
@@ -66,5 +66,6 @@ static Command commands[] = {
 	{"test_mm",(CmdHandler)test_mm,0},
 	{"test_prio",(CmdHandler)test_prio,0},
 	{"test_processes",(CmdHandler)test_processes,0},
-	{"test_sync",(CmdHandler)test_sync,0}
+	{"test_sync",(CmdHandler)test_sync,0},
+	{"test_no_sync", (CmdHandler)test_no_sync,0}
 };
