@@ -173,6 +173,11 @@ static void printStats(semaphore * sem) {
     printnum(sem->value);
     print(" | ");
     processNode * it = sem->blockedQueue.first;
+    if (it == NULL) {
+        print("-");
+        newLine();
+        return;
+    }
     while (it != NULL) {
         printnum(it->pid);
         print(" ");
@@ -186,6 +191,10 @@ void semPrintPIDs(semID id) {
     while (iterator != NULL) {
         if (iterator->id == id) {
             processNode * it = iterator->blockedQueue.first;
+            if (it == NULL) {
+                print("-");
+                return;
+            }
             while (it != NULL) {
                 printnum(it->pid);
                 print(" ");
