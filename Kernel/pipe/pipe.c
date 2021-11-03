@@ -5,10 +5,12 @@
 #include <memory_manager.h>
 #include <scheduler.h>
 #include <console.h>
+#include <semaphores.h>
 
 #define PIPE_BUF 4096
 #define MAX_FIFO 64
 
+static int semcounter = 0;
 struct Pipe {
     char buf[PIPE_BUF];
     uint32_t readIdx;
@@ -17,8 +19,8 @@ struct Pipe {
     int writeOpen;
     int readpid;
     int writepid;
-    // sem writequeue
-    // sem readqueue
+    semID writequeue;
+    semID readqueue;
 
     // only for printing
     int readfd;
@@ -115,6 +117,12 @@ int64_t openPipe(uint64_t fd[2]) {
     pipe->readOpen = 1;
     pipe->readIdx = 0;
     pipe->writeIdx = 0;
+
+    pipe->writequeue = semcounter++;
+    pipe->readqueue = semcounter++;
+
+    semOpen(pipe->writequeue, 1);
+    semOpen(pipe->readqueue, 1);
     
     // only for printing
     pipe->readfd = fd[0];
@@ -136,7 +144,6 @@ void closePipe(PIPE pipe, fdType type) {
         pipe->writeOpen = 0;
         pipe->buf[pipe->writeIdx++ % PIPE_BUF] = -1;
     }
-        
     
     if (!pipe->readOpen && !pipe->writeOpen) {
         // only for printing
@@ -146,6 +153,8 @@ void closePipe(PIPE pipe, fdType type) {
                 break;
             }
         }
+        deleteSemaphore(pipe->readqueue);
+        deleteSemaphore(pipe->writequeue);
         free(pipe);
     }
 }
@@ -154,13 +163,13 @@ int64_t readPipe(PIPE pipe, char* buf, uint64_t count) {
     if (!pipe->readOpen)
         return -1;
 
-    // semwait readqueue
+    semWait(pipe->readqueue);
 
     pipe->readpid = getpid();
     while (pipe->readIdx == pipe->writeIdx) {
         if (!pipe->writeOpen) {
             pipe->readpid = 0;
-            // sempost readqueue
+            semPost(pipe->readqueue);
             return 0;
         }
         blockProcess(pipe->readpid);
@@ -179,7 +188,7 @@ int64_t readPipe(PIPE pipe, char* buf, uint64_t count) {
     if (pipe->writepid)
         unblockProcess(pipe->writepid);
 
-    // sempost readqueue
+    semPost(pipe->readqueue);
     return i;
 }
 
@@ -187,14 +196,14 @@ int64_t writePipe(PIPE pipe, const char* buf, uint64_t count) {
     if (!pipe->writeOpen || !pipe->readOpen)
         return -1;
 
-    // semwait writequeue
+    semWait(pipe->writequeue);
 
     for(int i = 0; i < count; i++) {
         pipe->writepid = getpid();
         while(pipe->writeIdx == pipe->readIdx + PIPE_BUF) {
             if(!pipe->readOpen) {
                 pipe->writepid = 0;
-                // sempost writequeue
+                semPost(pipe->writequeue);
                 return -1;
             }
             if (pipe->readpid) 
@@ -208,8 +217,7 @@ int64_t writePipe(PIPE pipe, const char* buf, uint64_t count) {
     if (pipe->readpid) 
         unblockProcess(pipe->readpid);
 
-    // sempost writequeue
-
+    semPost(pipe->writequeue);
     return count;
 }
 

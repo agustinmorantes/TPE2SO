@@ -60,8 +60,10 @@ static PCB tempPCB;
 
 PID processCreate(void* program, unsigned int argc, char** argv) {
     void* memStart = alloc(PROC_MEM);
-    if (memStart == NULL) 
+    if (memStart == NULL) {
+        printcln("NO MORE MEMORY TO CREATE PROCESS",Black,Red);
         return -1;
+    }
     
     void* memEnd = (char*)memStart + PROC_MEM - 1;
 
@@ -105,6 +107,7 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     tempPCB.argv = newProcArgv;
     tempPCB.priority = DEFAULT_PRIORITY;
     tempPCB.background = DEFAULT_BACKGROUND;
+
     if (pid == 1) { // si es el primer proceso le abro los std fds
         tempPCB.fd[0] = 0;
         tempPCB.fd[1] = 1;

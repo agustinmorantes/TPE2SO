@@ -15,3 +15,4 @@ int semPost(semID id);
 int semClose(semID id);
 void semPrintAll();
 void semPrintPIDs(semID id);
+int deleteSemaphore(semID id);

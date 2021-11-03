@@ -165,4 +165,17 @@ size_t getUsedMemory() {
     return MAX_SIZE - freeBytesRemaining;
 }
 
+void print_mem_state() {
+   print("Total Mem: 0x");
+   printhex(MAX_SIZE);
+   print(" Bytes\n");
+
+   print("Used Mem: 0x");
+   printhex(MAX_SIZE - freeBytesRemaining);
+   print(" Bytes\n");
+
+   print("Free Mem: 0x");
+   printhex(freeBytesRemaining);
+   print(" Bytes\n");
+}
 #endif
