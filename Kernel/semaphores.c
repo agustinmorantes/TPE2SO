@@ -100,7 +100,7 @@ static void removeFromQueue(processQueue * queue, PID pid) {
 
 static PID popBlockedQueue(processQueue * queue) {
     if (queue->first == NULL)
-        return;
+        return -1;
     processNode * toRemove = queue->first;
     PID pid = toRemove->pid;
     queue->first = queue->first->next;
@@ -144,6 +144,7 @@ int semOpen(semID id, uint64_t value) {
 
 static void wakeup(processQueue * queue) {
     PID pid = popBlockedQueue(queue);
+    if (pid < 0) return;
     unblockProcess(pid);
 }
 

@@ -26,6 +26,9 @@ GLOBAL _semwait
 GLOBAL _sempost
 GLOBAL _semclose
 GLOBAL _syslistsem
+GLOBAL _sysalloc
+GLOBAL _sysfree
+GLOBAL _sysmem
 
 section .text
 
@@ -96,3 +99,9 @@ _semclose:
     systemCall 26
 _syslistsem:
     systemCall 27
+_sysalloc:
+    systemCall 28
+_sysfree:
+    systemCall 29
+_sysmem:
+    systemCall 30

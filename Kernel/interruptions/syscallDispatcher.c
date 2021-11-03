@@ -93,7 +93,18 @@ int64_t syscallDispatcher(uint64_t num, int64_t arg0, int64_t arg1, int64_t arg2
 	  		break;
 		case 27:
 			listSemaphoreSyscall();
-			return;
+			return 0;
+			break;
+		case 28:
+			return allocSyscall((unsigned long) arg0);
+			break;
+		case 29:
+			freeSyscall((void*) arg0);
+			return 0;
+			break;
+		case 30:
+			listmemSyscall();
+			return 0;
 			break;
 	}
 	return -1;

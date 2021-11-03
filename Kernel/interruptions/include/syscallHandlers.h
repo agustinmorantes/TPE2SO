@@ -33,3 +33,6 @@ int semWaitSyscall(semID id);
 int semPostSyscall(semID id);
 int semCloseSyscall(semID id);
 void listSemaphoreSyscall();
+void* allocSyscall(unsigned long size);
+void freeSyscall(void* mem);
+void listmemSyscall();

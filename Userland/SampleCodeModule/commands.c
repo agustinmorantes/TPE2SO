@@ -122,6 +122,7 @@ int cmd_loop() {
         if(t.seconds != (t = getCurrentTime()).seconds && t.seconds % 3 == 0) {
             printf("[PID:%d] Hola soy loop\n", pid);
         }
+        _sysyield();
     }
 }
 

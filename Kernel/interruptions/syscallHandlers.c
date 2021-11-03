@@ -234,3 +234,15 @@ void listProcessSyscall() {
 void listSemaphoreSyscall() {
     semPrintAll();
 }
+
+void* allocSyscall(unsigned long size) {
+    return alloc(size);
+}
+
+void freeSyscall(void* mem) {
+    free(mem);
+}
+
+void listmemSyscall() {
+    print_mem_state();
+}

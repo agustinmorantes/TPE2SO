@@ -54,33 +54,37 @@ static uint64_t strlen(const char * s) {
     return i;
 }
 
+static char* staticArgs[1024];
+
+static PCB tempPCB;
+
 PID processCreate(void* program, unsigned int argc, char** argv) {
     void* memStart = alloc(PROC_MEM);
-    if (memStart == NULL) 
+    if (memStart == NULL) {
+        printcln("NO MORE MEMORY TO CREATE PROCESS",Black,Red);
         return -1;
+    }
     
     void* memEnd = (char*)memStart + PROC_MEM - 1;
 
     for(uint8_t* i = (uint8_t*)memStart; i <= memEnd; i++)
         *i = 0;
 
-
     //Copy argv into process stack
     int argvStringsSize = 0;
-    char* kernelStackArgv[1024];
     for(int i = 0; i < argc; i++) {
         int size = strlen(argv[i]) + 1;
         argvStringsSize += size;
         char* dir = (char*)memEnd - argvStringsSize;
         strcpy(dir, argv[i]);
-        kernelStackArgv[i] = dir;
+        staticArgs[i] = dir;
     }
 
     char** newProcArgv = (char**)((char*)memEnd - argvStringsSize) - argc;
     for(int i = 0; i < argc; i++) {
-        newProcArgv[i] = kernelStackArgv[i];
+        newProcArgv[i] = staticArgs[i];
     }    
-
+  
     void* rsp = (uint64_t*)newProcArgv-1;
     rsp = (uint64_t)rsp % 8 == 0 ? rsp : (uint64_t)rsp - (uint64_t)rsp % 8;
 
@@ -94,30 +98,29 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     p->regs.rdi = (uint64_t)argc;
     p->regs.rsi = (uint64_t)newProcArgv;
 
-    PCB pcb;
+    tempPCB.pid = pid;
+    tempPCB.rsp = &(p->regs);
+    tempPCB.state = READY;
+    tempPCB.memStart = memStart;
+    tempPCB.argc = argc;
+    tempPCB.argv = newProcArgv;
+    tempPCB.priority = DEFAULT_PRIORITY;
+    tempPCB.background = DEFAULT_BACKGROUND;
 
-    pcb.pid = pid;
-    pcb.rsp = &(p->regs);
-    pcb.state = READY;
-    pcb.memStart = memStart;
-    pcb.argc = argc;
-    pcb.argv = newProcArgv;
-    pcb.priority = DEFAULT_PRIORITY;
-    pcb.background = DEFAULT_BACKGROUND;
     if (pid == 1) { // si es el primer proceso le abro los std fds
-        pcb.fd[0] = 0;
-        pcb.fd[1] = 1;
-        pcb.fd[2] = 2;
+        tempPCB.fd[0] = 0;
+        tempPCB.fd[1] = 1;
+        tempPCB.fd[2] = 2;
         for (int i = 3; i < MAX_FD; i++)
-            pcb.fd[i] = -1;
+            tempPCB.fd[i] = -1;
     } else if (pid > 1) // si es otro le doy los del padre
-        forkfd(pcb.fd);
+        forkfd(tempPCB.fd);
     pid++;
     
-    if(schedulerAddProcess(pcb) < 0) {
+    if(schedulerAddProcess(tempPCB) < 0) {
         free(memStart);
         return -1;
     }
 
-    return pcb.pid;
+    return tempPCB.pid;
 }

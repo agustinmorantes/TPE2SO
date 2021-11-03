@@ -1,7 +1,9 @@
 #pragma once
 #include <stdint.h>
+#include <tests.h>
+#include <syscall.h>
 
-#define CMD_COUNT 24
+#define CMD_COUNT 28
 
 typedef int (*CmdHandler)(int argc, const char* argv[]);
 
@@ -40,7 +42,7 @@ static Command commands[] = {
 	{"clear",cmd_clear,0},
 	{"time",cmd_time,0},
 	{"loop",cmd_loop,0},
-	{"mem", cmd_not_implemented,0},
+	{"mem", _sysmem,0},
 	{"ps", cmd_ps, 0},
 	{"kill", cmd_kill,0},
 	{"nice", cmd_nice,0},
@@ -60,4 +62,8 @@ static Command commands[] = {
 	{"suma", cmd_suma,0},
 	{"fdmaptest",cmd_fdMap_test,0},
 	{"greet",cmd_greet,0},
+	{"test_mm",test_mm,0},
+	{"test_prio",test_prio,0},
+	{"test_processes",test_processes,0},
+	{"test_sync",test_sync,0}
 };
