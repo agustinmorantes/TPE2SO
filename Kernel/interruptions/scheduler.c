@@ -253,17 +253,33 @@ void removeTerminated(ProcessNode * terminated) {
 int64_t terminateProcess(PID pid) {
     if (readyList.current->pcb.pid == pid) {
         readyList.current->pcb.state = TERMINATED;
+
+        if(readyList.current->pcb.background == FOREGROUND) {
+            setBackground(1, FOREGROUND);
+            unblockProcess(1);
+        }
+
         _int20();
         return 0;
     }
     ProcessNode * process = searchReadyNode(pid);
     if (process) {
+        if(process->pcb.background == FOREGROUND) {
+            setBackground(1, FOREGROUND);
+            unblockProcess(1);
+        }
+        
         process->pcb.state = TERMINATED;
         removeTerminated(process);
         return 0;
     }
     process = searchBlockedNode(pid);
     if (process) {
+        if(process->pcb.background == FOREGROUND){
+            setBackground(1, FOREGROUND);
+            unblockProcess(1);
+        }
+
         removeTerminated(process);
         return 0;
     }
