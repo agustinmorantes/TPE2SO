@@ -64,7 +64,6 @@ void haltProc() {
 int main()
 {
 	clearTerminal();
-	printcln("[Kernel Main]", Black, Yellow);
 
 	_cli();
 
@@ -77,18 +76,12 @@ int main()
 	char* argv[] = {0};
 
 	PID pid = processCreate(&haltProc, 0, argv);
-	print("Halt process created with PID ");
-	printnum(pid);
-	newLine();
 
 	char* argvshell[] = {"shell"};
 
 	pid = processCreate(sampleCodeModuleAddress, 1, argvshell);
 	changePriority(pid, HIGH);
 	setBackground(pid, FOREGROUND);
-	print("First process created with PID ");
-	printnum(pid);
-	newLine();
 
 	load_idt();
 

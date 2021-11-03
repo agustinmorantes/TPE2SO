@@ -13,7 +13,7 @@
 #define MUTEX_ID 128
 #define SEMAPHORE_MIN_ID 129
 
-#define LEFT(x) (((x)==philoCount)? 0 : (x)+1)
+#define LEFT(x) (((x)+philoCount-1)%philoCount)
 #define RIGHT(x) (((x)+1)%philoCount)
 
 static uint8_t philoVector[MAX_PHILO_COUNT];
@@ -35,27 +35,23 @@ void tryToEat(int idx) {
 
 void stopEating(int idx) {
     _semwait(MUTEX_ID);
-    philoVector[SEMAPHORE_MIN_ID + idx] = THINKING;
-    if (philoVector[SEMAPHORE_MIN_ID + LEFT(idx)] == HUNGRY)
-        _sempost(LEFT(idx));
-    if (philoVector[SEMAPHORE_MIN_ID + RIGHT(idx)] == HUNGRY)
-        _sempost(RIGHT(idx));
+    philoVector[idx] = THINKING;
+    if (philoVector[LEFT(idx)] == HUNGRY)
+        _sempost(SEMAPHORE_MIN_ID + LEFT(idx));
+    if (philoVector[RIGHT(idx)] == HUNGRY)
+        _sempost(SEMAPHORE_MIN_ID + RIGHT(idx));
     _sempost(MUTEX_ID);
 }
 
 void philosophers(unsigned int argc, const char** argv) {
     int idx;
-    if (argc > 1) {
-        if (strToIntBase(argv[1], strlen(argv[1]), 10, &idx, 1) <= 0)
-            return;
-    }
+    if (argc > 1)
+        strToIntBase(argv[1], strlen(argv[1]), 10, &idx, 1);
 
     while (1) {
         //Thinking
-        for (int i = 0; i < 10000; i++);
         tryToEat(idx);
         //Eating
-        for (int i = 0; i < 10000; i++); 
         stopEating(idx);
     }
 }
@@ -63,7 +59,9 @@ void philosophers(unsigned int argc, const char** argv) {
 void philosopherPrinter() {
     Time t = getCurrentTime();
     while(1) {
-        if(t.seconds != (t = getCurrentTime()).seconds && t.seconds % 1 == 0) {
+        Time newT = getCurrentTime();
+        if(t.seconds != newT.seconds) {
+            t = newT;
             for (int i = 0; i < philoCount; i++) {
                 char * printState;
                 switch (philoVector[i]) {
@@ -128,11 +126,11 @@ void philosopherManager() {
             break;
         }
         
+        _syskill(printerpid);
         for (int i = 0; i < philoCount; i++) {
             _syskill(philoPID[i]);
             _semclose(SEMAPHORE_MIN_ID + i);
         }
-        _syskill(printerpid);
         _semclose(MUTEX_ID);
 
         if (end) break;
