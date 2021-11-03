@@ -9,7 +9,7 @@
 
 #define START_PROC_SEM 1
 
-#define WRAPPER_ARGS 4
+#define WRAPPER_ARGS 3
 
 static PID shellPid;
 
@@ -48,14 +48,9 @@ static uint8_t split(char* input, char* buf[], uint8_t maxCount) {
 }
 
 int readinput(char* outputBuf) {
-	if(isForeground) printf("> ");
+	printf("> ");
 	int len = 0;
-	len = _sysread(0, outputBuf, MAX_CMD_LEN);
-	if(len <= 0) {
-		if(!isForeground) printf("> ");
-		return -1;
-	}
-	isForeground = 1;
+	while((len = _sysread(0, outputBuf, MAX_CMD_LEN)) <= 0);
 	outputBuf[len-1] = 0;
 	return 0;
 }
@@ -75,9 +70,6 @@ int shellProcessWrapper(int argc, char** argv) {
 	int unusedPipeEnd;
 	strToIntBase(argv[argc-WRAPPER_ARGS+2], strlen(argv[argc-WRAPPER_ARGS+2]), 10, &unusedPipeEnd, 0);
 
-	int usedPipeEnd;
-	strToIntBase(argv[argc-WRAPPER_ARGS+3], strlen(argv[argc-WRAPPER_ARGS+3]), 10, &usedPipeEnd, 0);
-
 	if(unusedPipeEnd >= 0) {
 		_sysclose(unusedPipeEnd);
 	}
@@ -86,9 +78,6 @@ int shellProcessWrapper(int argc, char** argv) {
     
 	int retcode = cmd(argc-WRAPPER_ARGS, (const char**)argv);
 	_sysmapstdfds(pid, 0, 1);
-
-	if(usedPipeEnd >= 0)
-		_sysclose(usedPipeEnd);
 
 	_semclose(START_PROC_SEM);
     _sysexit();
@@ -117,7 +106,6 @@ void runCommand(Command cmd, int argc, char** argv) {
 	
 	argv[argc] = handlerStr;
 	argv[argc+2] = "-1";
-	argv[argc+3] = "-1";
 
 	if(cmd.isBackground) {
 		argv[argc+1] = "1"; //Background
@@ -155,10 +143,7 @@ void runPipedCommands(Command cmd0, Command cmd1, int argc0, int argc1, char** a
 	
 	//Pipes to close
 	argv0[argc0+2] = pipeInStr;
-	argv0[argc0+3] = pipeOutStr;
-
 	argv1[argc1+2] = pipeOutStr;
-	argv1[argc1+3] = pipeInStr;
 
 	if(cmd1.isBackground) {
 		argv0[argc0+1] = "1";
