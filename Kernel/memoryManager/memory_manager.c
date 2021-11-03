@@ -85,7 +85,7 @@ void * alloc(size_t wantedSize) {
 
     freeNode * prevNode = &startNode;
     freeNode * iterator = startNode.next;
-    void * toReturn;
+    void * toReturn = NULL;
     
     while ((iterator->size < wantedSize) && (iterator->next != NULL)) {
         prevNode = iterator;
