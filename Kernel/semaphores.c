@@ -35,13 +35,15 @@ static semaphore * searchSemaphore(semID searchID) {
 static void removeSemaphore(semID id) {
     semaphore * prev = semList;
     if (prev->id == id) {
-        semList = NULL;
+        semList = semList->next;
         free(prev);
+        return;
     }
     semaphore * iterator = semList->next;
     while (iterator != NULL) {
-        if ((iterator->id = id)) {
+        if (iterator->id == id) {
             prev->next = iterator->next;
+            free(iterator);
             return;
         }
         prev = prev->next;
@@ -62,7 +64,7 @@ static void addToProcessQueue(processQueue * queue, PID pid, int isActiveQueue) 
     
     processNode * toAdd = alloc(sizeof(processNode));
     if (toAdd == NULL)
-        return; //TODO
+        return; 
     toAdd->pid = pid;
     toAdd->next = NULL;
     if (queue->first == NULL)
@@ -231,6 +233,7 @@ int semPost(semID id) {
     sem->value += 1;
     wakeup(&(sem->blockedQueue));
     release(&(sem->lock));
+    yield();
     return 0;
 }
 
@@ -243,10 +246,8 @@ int semClose(semID id) {
         return -2;
     
     removeFromQueue(&(sem->activeQueue), getpid());
-    if (sem->activeQueue.first == NULL) {
+    if (sem->activeQueue.first == NULL)
         removeSemaphore(sem->id);
-        free(sem);
-    }
     return 1;
 }
 
@@ -256,6 +257,5 @@ int deleteSemaphore(semID id) {
     if (sem == NULL)
         return -1;
     removeSemaphore(sem->id);
-    free(sem);
     return 1;
 }
