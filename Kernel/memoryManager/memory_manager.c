@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <console.h>
 
 #define MAX_SIZE 0x4000000 // 64Mb
 #define START_MM 0x900000
