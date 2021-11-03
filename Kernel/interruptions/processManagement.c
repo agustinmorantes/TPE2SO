@@ -39,6 +39,21 @@ typedef struct {
 } ProcState;
 #pragma pack(pop)
 
+static uint64_t strcpy(char * to, const char * from) {
+	int i;
+    for (i = 0; from[i] != 0; i++)
+    {
+        to[i] = from[i];
+    }
+    return i;
+}
+
+static uint64_t strlen(const char * s) {
+    int i;
+    for (i = 0; s[i] != 0; i++);
+    return i;
+}
+
 PID processCreate(void* program, unsigned int argc, char** argv) {
     void* memStart = alloc(PROC_MEM);
     if (memStart == NULL) 
@@ -49,15 +64,35 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     for(uint8_t* i = (uint8_t*)memStart; i <= memEnd; i++)
         *i = 0;
 
-    ProcState* p = (ProcState*)((char*)memEnd - sizeof(ProcState) + 1);
 
+    //Copy argv into process stack
+    int argvStringsSize = 0;
+    char* kernelStackArgv[1024];
+    for(int i = 0; i < argc; i++) {
+        int size = strlen(argv[i]) + 1;
+        argvStringsSize += size;
+        char* dir = (char*)memEnd - argvStringsSize;
+        strcpy(dir, argv[i]);
+        kernelStackArgv[i] = dir;
+    }
+
+    char** newProcArgv = (char**)((char*)memEnd - argvStringsSize) - argc;
+    for(int i = 0; i < argc; i++) {
+        newProcArgv[i] = kernelStackArgv[i];
+    }    
+
+    void* rsp = (uint64_t*)newProcArgv-1;
+    rsp = (uint64_t)rsp % 8 == 0 ? rsp : (uint64_t)rsp - (uint64_t)rsp % 8;
+
+
+    ProcState* p = (ProcState*)((char*)rsp - sizeof(ProcState) + 1);
     p->cs = 8;
-    p->rsp = p->regs.rbp = memEnd;
+    p->rsp = p->regs.rbp = rsp;
     p->rflags = 0x202;
     p->rip = program;
 
     p->regs.rdi = (uint64_t)argc;
-    p->regs.rsi = (uint64_t)argv;
+    p->regs.rsi = (uint64_t)newProcArgv;
 
     PCB pcb;
 
@@ -66,7 +101,7 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     pcb.state = READY;
     pcb.memStart = memStart;
     pcb.argc = argc;
-    pcb.argv = argv;
+    pcb.argv = newProcArgv;
     pcb.priority = DEFAULT_PRIORITY;
     pcb.background = DEFAULT_BACKGROUND;
     if (pid == 1) { // si es el primer proceso le abro los std fds
