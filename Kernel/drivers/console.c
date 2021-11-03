@@ -15,13 +15,13 @@ void initVideo() {
 	resetCursor();
 }
 
-static uint64_t getCursorX() {
-	return cursorPos%COLS;
-}
+// static uint64_t getCursorX() {
+// 	return cursorPos%COLS;
+// }
 
-static uint64_t getCursorY() {
-	return cursorPos/COLS;
-}
+// static uint64_t getCursorY() {
+// 	return cursorPos/COLS;
+// }
 
 static void scrollUp() {
 	//Muevo todo una linea hacia arriba

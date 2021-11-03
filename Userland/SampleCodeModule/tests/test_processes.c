@@ -64,6 +64,7 @@ void test_processes()
     for (rq = 0; rq < MAX_PROCESSES; rq++)
     {
       p_rqs[rq].pid = my_create_process(&endless_loop, "endless_loop"); // TODO: Port this call as required
+
       if (p_rqs[rq].pid == -1)
       {                                     // TODO: Port this as required
         printf("Error creating process\n"); // TODO: Port this as required
@@ -124,7 +125,6 @@ void test_processes()
           }
           p_rqs[rq].state = RUNNING;
         }
-
     }
   printf("OK\n");
   }

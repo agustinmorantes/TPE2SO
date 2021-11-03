@@ -31,7 +31,7 @@ typedef struct {
 typedef struct {
     RegState regs;
     void* rip;
-    void* cs;
+    uint64_t cs;
     uint64_t rflags;
     void* rsp;
     void* ss;
@@ -67,7 +67,7 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     
     void* memEnd = (char*)memStart + PROC_MEM - 1;
 
-    for(uint8_t* i = (uint8_t*)memStart; i <= memEnd; i++)
+    for(uint8_t* i = (uint8_t*)memStart; i <= (uint8_t*)memEnd; i++)
         *i = 0;
 
     //Copy argv into process stack
@@ -84,14 +84,15 @@ PID processCreate(void* program, unsigned int argc, char** argv) {
     for(int i = 0; i < argc; i++) {
         newProcArgv[i] = staticArgs[i];
     }    
-  
+
     void* rsp = (uint64_t*)newProcArgv-1;
-    rsp = (uint64_t)rsp % 8 == 0 ? rsp : (uint64_t)rsp - (uint64_t)rsp % 8;
+    rsp = (void*)((uint64_t)rsp % 8 == 0 ? (uint64_t)rsp : (uint64_t)rsp - (uint64_t)rsp % 8);
 
 
     ProcState* p = (ProcState*)((char*)rsp - sizeof(ProcState) + 1);
     p->cs = 8;
-    p->rsp = p->regs.rbp = rsp;
+    p->regs.rbp = (uint64_t)rsp;
+    p->rsp = rsp;
     p->rflags = 0x202;
     p->rip = program;
 

@@ -4,7 +4,7 @@
 #include <scheduler.h>
 
 #define KEY_COUNT 105
-#define BUFF_LEN 4096
+#define BUFF_LEN 4096U
 
 //Tabla de conversión de scancode a Key
 static const Key KeyTable[] = {
@@ -92,7 +92,7 @@ static const uint8_t ShiftAsciiTable[] = {
 //Estado (valor booleano) actual de cada tecla
 static uint8_t keyState[KEY_COUNT] = {0};
 
-static uint8_t keysToRead = 0;
+static uint64_t keysToRead = 0;
 
 // Para saber si el último scancode que lei fue 0xE0 (para teclas con scancode de 2 o más bytes) 
 static uint8_t isSpecialKey = 0; 

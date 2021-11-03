@@ -28,7 +28,7 @@ typedef struct {
     void* rsp;
     void* memStart;
     unsigned int argc;
-    const char** argv;
+    char** argv;
     Priority priority;
     Background background;
     int fd[MAX_FD];
