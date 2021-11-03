@@ -13,11 +13,8 @@
 
 static PID shellPid;
 
-static uint8_t isForeground = 1;
-
 static void setShellBackground() {
 	_syssetbackground(shellPid, BACKGROUND);
-	isForeground = 0;
 }
 
 static const Command parseCommand(int argc, const char** argv) {
