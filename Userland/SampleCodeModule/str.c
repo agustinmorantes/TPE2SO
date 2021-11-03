@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 
 uint8_t isWhitespace(char c) {
@@ -146,7 +148,7 @@ uint32_t floatToStr(double value, char * buffer, uint32_t decimals) {
 	
 	int decpart = value;
 
-	digits =+ uintToBase(decpart,&buffer[digits],10);
+	digits += uintToBase(decpart,&buffer[digits],10);
 	return digits;
 }
 

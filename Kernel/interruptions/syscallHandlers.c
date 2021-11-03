@@ -11,7 +11,6 @@ static uint8_t rawMode = 0;
 
 int64_t write(uint64_t fd, const char* buf, uint64_t count) {
     fd = fdLocalToGlobal(fd);
-    if (fd < 0) return -1;
 
     if(fd == 1) {
         for(int i = 0; i < count; i++) {
@@ -32,7 +31,6 @@ int64_t write(uint64_t fd, const char* buf, uint64_t count) {
 
 int64_t read(uint64_t fd, char* buf, uint64_t count) {
     fd = fdLocalToGlobal(fd);
-    if (fd < 0) return -1;
 
     if(fd == 0) {
         if(getBackground()) {
