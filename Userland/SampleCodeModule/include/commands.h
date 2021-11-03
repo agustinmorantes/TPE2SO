@@ -36,6 +36,7 @@ int cmd_filter();
 int cmd_ps();
 int cmd_sem();
 int cmd_pipe();
+void philosopherManager();
 
 static Command commands[] = {
 	{"help",cmd_help,0},
@@ -52,7 +53,7 @@ static Command commands[] = {
 	{"wc", cmd_wc,0},
 	{"filter", cmd_filter,0},
 	{"pipe", cmd_pipe,0},
-	{"phylo", cmd_not_implemented,0},
+	{"phylo", (CmdHandler)philosopherManager,0},
 	{"printmem", cmd_printmem,0},
     {"inforeg", cmd_inforeg,0},
 	{"printcpufeatures", cmd_printcpufeatures,0},
