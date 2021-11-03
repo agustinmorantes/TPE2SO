@@ -2,7 +2,7 @@
 #include <str.h>
 #include <syscall.h>
 
-#define N 1000000
+#define N 100000
 
 static uint32_t my_create_process(void* func, int argc, char** argv){
   return _syscreateprocess(func, argc, argv);
@@ -21,7 +21,7 @@ static uint64_t my_sem_post(int sem_id){
 }
 
 static uint64_t my_sem_close(int sem_id){
-  return my_sem_close(sem_id);
+  return _semclose(sem_id);
 }
 
 #define TOTAL_PAIR_PROCESSES 2
@@ -41,11 +41,9 @@ static void inc(int argc, char** argv){
   strToIntBase(argv[1], strlen(argv[1]), 10, (int*)&sem, 1);
   strToIntBase(argv[2], strlen(argv[2]), 10, (int*)&value, 0);
 
-  printf("[inc] sem:%d, val:%d", sem, value);
-
   uint64_t i;
 
-  if (sem && !my_sem_open(SEM_ID, 1)){
+  if (sem && my_sem_open(SEM_ID, 1) < 0){
     printf("ERROR OPENING SEM\n");
     return;
   }
@@ -59,6 +57,7 @@ static void inc(int argc, char** argv){
   if (sem) my_sem_close(SEM_ID);
   
   printf("Final value: %d\n", global);
+  _sysexit();
 }
 
 void test_sync(){
