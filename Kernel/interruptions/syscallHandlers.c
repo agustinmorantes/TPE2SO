@@ -6,6 +6,7 @@
 #include <fd.h>
 #include <pipe.h>
 #include <semaphores.h>
+#include <shm.h>
 
 static uint8_t rawMode = 0;
 
