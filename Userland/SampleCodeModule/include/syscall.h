@@ -59,3 +59,4 @@ void _syslistsem();
 void* _sysalloc(unsigned int size);
 void _sysfree(void* mem);
 void _sysmem();
+void * _sysshmopen(uint64_t id);

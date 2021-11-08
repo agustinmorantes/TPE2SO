@@ -29,6 +29,7 @@ GLOBAL _syslistsem
 GLOBAL _sysalloc
 GLOBAL _sysfree
 GLOBAL _sysmem
+GLOBAL _sysshmopen
 
 section .text
 
@@ -105,3 +106,5 @@ _sysfree:
     systemCall 29
 _sysmem:
     systemCall 30
+_sysshmopen:
+    systemCall 31

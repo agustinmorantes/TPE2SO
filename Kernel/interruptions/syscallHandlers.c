@@ -244,3 +244,7 @@ void freeSyscall(void* mem) {
 void listmemSyscall() {
     print_mem_state();
 }
+
+void * createSharedMemory(uint64_t id) {
+    return shmOpen(id);
+}

@@ -3,7 +3,7 @@
 #include <tests.h>
 #include <syscall.h>
 
-#define CMD_COUNT 29
+#define CMD_COUNT 31
 
 typedef int (*CmdHandler)(int argc, const char* argv[]);
 
@@ -36,6 +36,8 @@ int cmd_filter();
 int cmd_ps();
 int cmd_sem();
 int cmd_pipe();
+int cmd_shm_write();
+int cmd_shm_read();
 void philosopherManager();
 
 static Command commands[] = {
@@ -67,5 +69,7 @@ static Command commands[] = {
 	{"test_prio",(CmdHandler)test_prio,0},
 	{"test_processes",(CmdHandler)test_processes,0},
 	{"test_sync",(CmdHandler)test_sync,0},
-	{"test_no_sync", (CmdHandler)test_no_sync,0}
+	{"test_no_sync", (CmdHandler)test_no_sync,0},
+	{"shm_write", cmd_shm_write},
+	{"shm_read", cmd_shm_read}
 };
