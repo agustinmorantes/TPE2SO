@@ -277,3 +277,48 @@ int cmd_not_implemented() {
     printf("Comando no implementado\n");
     return 0;
 }
+
+#define SHM_ID 1
+
+int cmd_shm_write() {
+    void* shm = createSharedMemory(SHM_ID);
+    if(shm == NULL) {
+        printf("ERROR AL CREAR SHM");
+        return 1;
+    }
+
+    char* ptr = (char*) shm;
+    *ptr = 0;
+
+    Time t = getCurrentTime();
+    PID pid = _sysgetpid();
+    while(1) {
+        Time newT = getCurrentTime();
+        if((t.seconds != newT.seconds) && (newT.seconds % 3 == 0)) {
+            t = newT;
+            *ptr = '1';
+            ptr++;
+            *ptr = 0;
+            ptr++;
+        }
+        _sysyield();
+    }
+}
+
+int cmd_shm_read() {
+    void* shm = createSharedMemory(SHM_ID);
+    if(shm == NULL) {
+        printf("ERROR AL CREAR SHM");
+        return 1;
+    }
+
+    char* ptr = (char*)shm;
+
+    while(1) {
+        if(*ptr != 0) {
+            printf("%c", *ptr);
+            ptr++;
+        }
+        _sysyield();
+    }
+}
