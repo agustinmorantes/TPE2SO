@@ -1,97 +1,75 @@
-Manual de usuario
-==================
-Manual de usuario para nuestro TPE
+# TPE2SO - Sistema Operativo x64
 
-## Uso de terminal
-La pantalla contiene en todo momento 2 terminales. Para cambiar entre ellas utilice la tecla TAB del teclado.
-Solo se puede cambiar de terminales cuando está activo el prompt de la shell (cuando es posible ejecutar comandos) por decisión de diseño.
-Si se encuentra ejecutando un comando que requiere input de entrada estándar y presiona TAB, verá que no se cambia la terminal.
+## Descripción del Proyecto
+Este proyecto es un Sistema Operativo de 64 bits para la arquitectura Intel x86-64, desarrollado como parte de la materia Sistemas Operativos. El sistema cuenta con un kernel con preemptive multitasking, memory management avanzado y mecanismos de IPC (Inter-Process Communication).
 
-Una vez que figura el prompt (`>`), puede interactuar con el sistema escribiendo comandos con sus argumentos e ingresándolos con la tecla ENTER.
-Ejemplo: `>printmem abcdef`
+## Características Implementadas
 
-A continuación se listan los comandos implementados y su uso.
+### Kernel
+- **Preemptive Multitasking:** Scheduler que soporta múltiples procesos con diferentes niveles de prioridad (LOW, MEDIUM, HIGH) y ejecución en foreground o background.
+- **Memory Management:** Soporte para dos memory managers diferentes:
+  - Memory manager por defecto (basado en listas).
+  - **Buddy Allocator**.
+- **Syscalls:** Conjunto completo de syscalls para control de procesos, I/O, memoria y sincronización (ejecutadas vía `int 80h`).
+- **Drivers:**
+  - Driver de teclado.
+  - Driver de video con soporte para múltiples terminales.
+  - Driver de RTC.
 
-## Comandos
-- `help`
-- `lscmd`
-- `clear`
-- `greet`
-- `time`
-- `printmem`
-- `inforeg`
-- `printcpufeatures`
-- `divbyzero`
-- `invalidopcode`
-- `roots`
-- `suma`
+### IPC y Sincronización
+- **Pipes:** Soporte para pipes anónimos y FIFOs (named pipes) para la transmisión de datos entre procesos.
+- **Semáforos:** Implementación de semáforos para la sincronización de procesos y manejo de recursos compartidos.
+- **Redirección de I/O:** Capacidad de redirigir stdin y stdout de los procesos.
 
-### `help`
-Lista todos los comandos disponibles
+### Userland
+- **Shell Interactiva:** Interfaz de línea de comandos con soporte para dos terminales (intercambiables usando la tecla `TAB`). Soporta ejecución de comandos en background agregando `&` y pipes entre comandos usando `|`.
+- **Comandos del Sistema:**
+  - `help`: Lista los comandos disponibles.
+  - `ps`: Lista todos los procesos actuales con su estado, PID, prioridad, etc.
+  - `kill [pid]`: Termina un proceso en ejecución.
+  - `nice [pid] [priority]`: Cambia la prioridad de un proceso.
+  - `block [pid]`: Bloquea o desbloquea un proceso.
+  - `mem`: Muestra el estado actual de la memoria (total, libre, ocupada).
+  - `sem`: Lista los semáforos activos.
+  - `pipes`: Lista los pipes activos.
+  - `cat`, `wc`, `filter`: Utilidades estándar para el procesamiento de texto.
+  - `phylo`: Implementación visual del problema de los Filósofos Comensales.
+- **Tests Integrados:** Batería de pruebas para el memory manager (`test_mm`), scheduler (`test_processes`), sincronización (`test_sync`) y prioridades (`test_prio`).
 
----
+## Guía de Uso
 
-### `lscmd`
-Lista todos los comandos disponibles
+### Prerrequisitos
+- Docker (Recomendado para asegurar el entorno de compilación)
+- QEMU (Para emulación)
 
----
-
-### `clear`
-Limpia la terminal actual
-
----
-
-### `greet`
-Un simple programa que utiliza scanf y printf para hacer un saludo personalizado
-
----
-
-### `time`
-Muestra la fecha y la hora en pantalla
-
----
-
-### `printmem`
-Muestra en pantalla 32bytes a partir de la posición de memoria recibida por parametro.
-Muestra cada byte como 2 digitos hexadecimales, cada byte separado por un espacio.
-El parámetro tiene que ser hexadecimal válido sin prefijo `0x` ni sufijo `h` y ser una posición de memoria válida 
-Ejemplo: `printmem abcdef`
-
----
-
-### `inforeg`
-Muestra el valor de los registros al momento de ejecutar el comando
-
----
-
-### `printcpufeatures`
-Muestra los features que posee el cpu
-
----
-
-### `divbyzero`
-Programa ejemplo que realiza una división por cero.
-
----
-
-### `invalidopcode`
-Programa ejemplo que ejecuta una instrucción de procesador inválida
-
----
-
-### `roots`
-Recibe 3 números a,b y c por entrada estándar (scanf) y, utilizando el FPU calcula las raíces de la cuadrática asociada.
-Ejemplo de uso:
+### Compilación del Proyecto
+La forma más sencilla de compilar el proyecto es utilizando el script provisto que ejecuta Docker:
+```bash
+./build.sh
 ```
->roots
-Inserte los parámetros de la cuadrática (a, b, c): 1 3 2
-Las raíces son: -1.0 y -2.0
+Esto compilará el toolchain, el kernel y los módulos de userland en un entorno controlado.
+
+Para compilar manualmente en un entorno local (requiere `gcc`, `nasm`, `make`):
+```bash
+make all      # Utiliza el memory manager por defecto
+make buddy    # Utiliza el Buddy Allocator
 ```
 
----
+### Ejecución del Sistema Operativo
+Para lanzar el sistema operativo utilizando QEMU:
+```bash
+./run.sh
+```
+*(Nota: En sistemas Windows, se pueden utilizar los scripts `run.bat` o `open_qemu.bat`)*
 
-### `suma`
-Recibe 2 números por entrada estándar (scanf) y muestra en pantalla el resultado de la suma (printf)
+## Estructura del Proyecto
+- `/Bootloader`: Código fuente bootloader (Pure64 y BMFS).
+- `/Kernel`: Lógica central del kernel (scheduler, memory manager, drivers, syscalls).
+- `/Userland`: Aplicaciones de usuario, shell interactiva y tests.
+- `/Toolchain`: Utilidades para el build (ModulePacker).
+- `/Image`: Scripts y archivos necesarios para generar la imagen booteable.
 
----
-
+## Autores
+- **Mauro Sambartolomeo**
+- **Agustín Morantes**
+- **Juan Manuel Negro**
